@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай число</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <header>
+            <h1>🎲 Угадай число</h1>
+            <div class="score-board">
+                <span>Счёт: <strong id="current-score">0</strong></span>
+                <span>Вопрос: <strong id="question-num">1</strong>/5</span>
+            </div>
+        </header>
+
+        <!-- Карточка вопроса -->
+        <main id="game-screen">
+            <div class="card">
+                <p class="question-text" id="question-text">Загрузка...</p>
+                <div class="input-group">
+                    <input type="number" id="user-answer" placeholder="Ваше число" autofocus>
+                    <span class="unit" id="unit-label"></span>
+                </div>
+                <div class="quick-buttons">
+                    <button onclick="multiply(10)">×10</button>
+                    <button onclick="multiply(100)">×100</button>
+                    <button onclick="addZero()">Добавить 0</button>
+                </div>
+                <button class="submit-btn" onclick="submitAnswer()">Ответить 🚀</button>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </main>
+
+        <!-- Таблица лидеров (скрыта до конца игры) -->
+        <aside id="leaderboard-screen" style="display: none;">
+            <h2>🏆 Таблица лидеров</h2>
+            <ol id="leaderboard-list"></ol>
+            <button onclick="restartGame()">Играть ещё</button>
+        </aside>
+    </div>
+
+    <script>
+        let currentFactId = null;
+        let totalScore = 0;
+        let questionsAnswered = 0;
+        const TOTAL_QUESTIONS = 5;
+        const userId = getUserId();
+
+        function getUserId() {
+            let id = localStorage.getItem('guess_user_id');
+            if (!id) {
+                id = crypto.randomUUID();
+                localStorage.setItem('guess_user_id', id);
+            }
+            return id;
+        }
+
+        async function loadQuestion() {
+            if (questionsAnswered >= TOTAL_QUESTIONS) {
+                endGame();
+                return;
+            }
+
+            const response = await fetch('/api/question');
+            const data = await response.json();
+
+            currentFactId = data.fact_id;
+            document.getElementById('question-text').textContent = data.question;
+            document.getElementById('unit-label').textContent = data.unit;
+            document.getElementById('user-answer').value = '';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('user-answer').focus();
+            document.getElementById('question-num').textContent = questionsAnswered + 1;
+        }
+
+        function multiply(factor) {
+            const input = document.getElementById('user-answer');
+            input.value = (parseFloat(input.value) || 0) * factor;
+            input.focus();
+        }
+
+        function addZero() {
+            const input = document.getElementById('user-answer');
+            input.value = (input.value || '') + '0';
+            input.focus();
+        }
+
+        async function submitAnswer() {
+            const answer = parseFloat(document.getElementById('user-answer').value);
+            if (isNaN(answer)) {
+                document.getElementById('feedback').innerHTML = '⚠️ Введите число!';
+                return;
+            }
+
+            const response = await fetch('/api/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fact_id: currentFactId, user_answer: answer })
+            });
+            const data = await response.json();
+
+            document.getElementById('feedback').innerHTML = `
+                <div class="result ${data.result}">
+                    <p>${data.message}</p>
+                    <small>${data.hint}</small>
+                    <p class="points">+${data.points} очков</p>
+                </div>
+            `;
+
+            totalScore += data.points;
+            document.getElementById('current-score').textContent = totalScore;
+            questionsAnswered++;
+
+            setTimeout(loadQuestion, 2000);
+        }
+
+        async function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('leaderboard-screen').style.display = 'block';
+
+            const response = await fetch('/api/save-score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, score: totalScore })
+            });
+            const data = await response.json();
+
+            if (data.needs_nickname) {
+                const nickname = prompt('🎉 Вы попали в топ-10! Введите никнейм:');
+                if (nickname) {
+                    await fetch('/api/nickname', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId, nickname: nickname })
+                    });
+                }
+            }
+
+            loadLeaderboard();
+        }
+
+        async function loadLeaderboard() {
+            const response = await fetch('/api/leaderboard');
+            const data = await response.json();
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = data.map((entry, i) =>
+                `<li>${entry.nickname} — ${entry.best_score} очков</li>`
+            ).join('');
+        }
+
+        function restartGame() {
+            totalScore = 0;
+            questionsAnswered = 0;
+            document.getElementById('current-score').textContent = '0';
+            document.getElementById('question-num').textContent = '1';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('leaderboard-screen').style.display = 'none';
+            loadQuestion();
+        }
+
+        loadQuestion();
+
+        document.getElementById('user-answer').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitAnswer();
+        });
+    </script>
+</body>
+</html>
