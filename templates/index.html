@@ -20,18 +20,24 @@
         <!-- Карточка вопроса -->
         <main id="game-screen">
             <div class="card">
-                <p class="question-text" id="question-text">Загрузка...</p>
-                <div class="input-group">
-                    <input type="number" id="user-answer" placeholder="Ваше число" autofocus>
-                    <span class="unit" id="unit-label"></span>
+                <img id="fact-image" class="card-image blurred" src="" alt="" style="display: none;">
+
+                <!-- Плавающая зона: очки + вопрос -->
+                <div class="question-area">
+                    <div class="score-popup" id="score-popup" style="display: none;">
+                        <span class="score-popup-text" id="score-popup-text">+0</span>
+                    </div>
+                    <p class="question-text" id="question-text">Загрузка...</p>
                 </div>
-                <div class="quick-buttons">
-                    <button onclick="multiply(10)">×10</button>
-                    <button onclick="multiply(100)">×100</button>
-                    <button onclick="addZero()">Добавить 0</button>
+
+                <!-- Статичная зона внизу -->
+                <div class="answer-area">
+                    <div class="input-group">
+                        <input type="number" id="user-answer" placeholder="Ваше число" autofocus>
+                        <span class="unit" id="unit-label"></span>
+                    </div>
+                    <button class="submit-btn" onclick="submitAnswer()">Ответить</button>
                 </div>
-                <button class="submit-btn" onclick="submitAnswer()">Ответить 🚀</button>
-                <div class="feedback" id="feedback"></div>
             </div>
         </main>
 
@@ -49,6 +55,26 @@
         let questionsAnswered = 0;
         const TOTAL_QUESTIONS = 5;
         const userId = getUserId();
+
+        // Цвета категорий (Brawl Stars стиль: яркие, с градиентом)
+        const categoryStyles = {
+            200:   { color: '#fff', glow: '#9e9e9e', bg: 'rgba(158,158,158,0.3)' },
+            800:   { color: '#fff', glow: '#80deea', bg: 'rgba(128,222,234,0.3)' },
+            2000:  { color: '#fff', glow: '#42a5f5', bg: 'rgba(66,165,245,0.3)' },
+            4000:  { color: '#fff', glow: '#ef5350', bg: 'rgba(239,83,80,0.3)' },
+            6500:  { color: '#fff', glow: '#ab47bc', bg: 'rgba(171,71,188,0.3)' },
+            10000: { color: '#fff', glow: '#f48fb1', bg: 'rgba(244,143,177,0.3)' },
+            15000: { color: '#fff', glow: '#ffd700', bg: 'rgba(255,215,0,0.4)' }
+        };
+
+        function getCategoryStyle(points) {
+            const thresholds = Object.keys(categoryStyles).map(Number).sort((a, b) => a - b);
+            let style = categoryStyles[200];
+            for (const t of thresholds) {
+                if (points >= t) style = categoryStyles[t];
+            }
+            return style;
+        }
 
         function getUserId() {
             let id = localStorage.getItem('guess_user_id');
@@ -72,9 +98,20 @@
             document.getElementById('question-text').textContent = data.question;
             document.getElementById('unit-label').textContent = data.unit;
             document.getElementById('user-answer').value = '';
-            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('score-popup').style.display = 'none';
             document.getElementById('user-answer').focus();
             document.getElementById('question-num').textContent = questionsAnswered + 1;
+
+            const img = document.getElementById('fact-image');
+            document.querySelector('.card').classList.remove('revealed');
+            if (data.image_url) {
+                img.src = data.image_url;
+                img.style.display = 'block';
+                img.classList.add('blurred');
+                img.classList.remove('revealed');
+            } else {
+                img.style.display = 'none';
+            }
         }
 
         function multiply(factor) {
@@ -89,12 +126,83 @@
             input.focus();
         }
 
+        function animateScoreBrawlStars(container, element, targetPoints, style) {
+            return new Promise(resolve => {
+                const duration = 1200 + (targetPoints / 15000) * 1400;
+                const startTime = performance.now();
+                let lastMilestone = 0;
+
+                const intensity = Math.min(1, targetPoints / 15000);
+                const baseGlow = 15 + intensity * 50;
+                const baseFontSize = 3.5;
+
+                element.style.color = '#fff';
+                element.style.textShadow = `
+                    0 0 ${baseGlow * 0.5}px ${style.glow},
+                    0 0 ${baseGlow}px ${style.glow}
+                `;
+                element.style.fontSize = baseFontSize + 'rem';
+                element.style.transform = 'translateY(0)';
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    const eased = progress < 0.5
+                        ? 4 * progress * progress * progress
+                        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                    const currentValue = Math.floor(targetPoints * eased);
+
+                    // Плавное увеличение размера для чисел > 4000
+                    if (targetPoints > 4000) {
+                        const sizeBoost = 1 + intensity * eased * 0.8;
+                        element.style.fontSize = (baseFontSize * sizeBoost) + 'rem';
+                    }
+
+                    element.textContent = '+' + currentValue.toLocaleString();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        element.textContent = '+' + targetPoints.toLocaleString();
+
+                        if (targetPoints > 4000) {
+                            element.style.fontSize = (baseFontSize * (1 + intensity * 0.8)) + 'rem';
+                        }
+
+                        // Вспышка вместо прыжка
+                        element.style.textShadow = `
+                            0 0 ${baseGlow * 3}px ${style.glow},
+                            0 0 ${baseGlow * 6}px ${style.glow},
+                            0 0 ${baseGlow * 10}px #fff
+                        `;
+
+                        setTimeout(() => {
+                            element.style.transition = 'text-shadow 0.3s ease, font-size 0.3s ease';
+                            element.style.fontSize = baseFontSize + 'rem';
+                            element.style.textShadow = `
+                                0 0 ${baseGlow * 0.5}px ${style.glow},
+                                0 0 ${baseGlow}px ${style.glow}
+                            `;
+                            setTimeout(() => {
+                                element.style.transition = '';
+                                resolve();
+                            }, 300);
+                        }, 200);
+                    }
+                }
+                requestAnimationFrame(update);
+            });
+        }
+
         async function submitAnswer() {
             const answer = parseFloat(document.getElementById('user-answer').value);
-            if (isNaN(answer)) {
-                document.getElementById('feedback').innerHTML = '⚠️ Введите число!';
-                return;
-            }
+            if (isNaN(answer)) return;
+
+            const btn = document.querySelector('.submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Ответить';
 
             const response = await fetch('/api/check', {
                 method: 'POST',
@@ -103,43 +211,173 @@
             });
             const data = await response.json();
 
-            document.getElementById('feedback').innerHTML = `
-                <div class="result ${data.result}">
-                    <p>${data.message}</p>
-                    <small>${data.hint}</small>
-                    <p class="points">+${data.points} очков</p>
-                </div>
-            `;
+            const img = document.getElementById('fact-image');
+            if (img.style.display !== 'none') {
+                img.classList.remove('blurred');
+                img.classList.add('revealed');
+                document.querySelector('.card').classList.add('revealed');
+            }
 
+            const style = getCategoryStyle(data.points);
+            const popup = document.getElementById('score-popup');
+            const popupText = document.getElementById('score-popup-text');
+
+            // Шаг 1: Набор очков
+            popup.style.display = 'block';
+            popup.style.opacity = '1';
+            await animateScoreBrawlStars(popup, popupText, data.points, style);
+
+            // Шаг 2: Корона для 15000
+            if (data.points >= 15000) {
+                // Плавно уменьшаем число
+                popupText.style.transition = 'font-size 0.4s ease';
+                popupText.style.fontSize = '2.5rem';
+                await new Promise(r => setTimeout(r, 400));
+
+                // Корона
+                popup.classList.add('crowned');
+                popupText.style.transition = 'font-size 0.3s ease';
+                popupText.style.fontSize = '3.5rem';
+                popupText.style.textShadow = '0 0 30px #ffd700, 0 0 60px #ffd700';
+                popupText.textContent = '+' + data.points.toLocaleString();
+
+                await new Promise(r => setTimeout(r, 2400));
+
+                popup.classList.add('crowned-flyaway');
+                await new Promise(r => setTimeout(r, 600));
+
+                popup.classList.remove('crowned', 'crowned-flyaway');
+
+                // Готовим к перелёту
+                popupText.style.transition = 'font-size 0.3s ease';
+                popupText.style.fontSize = '2.2rem';
+                popupText.style.textShadow = `0 0 15px ${style.glow}`;
+                await new Promise(r => setTimeout(r, 300));
+
+                popupText.style.transition = '';
+                popupText.style.fontSize = '';
+                popupText.style.textShadow = '';
+            }
+
+            // Шаг 3: Перелёт в общий счёт
+            await cartoonFlyToTotal(popup, data.points, style);
+
+            // Шаг 4: Общий счёт
+            const oldScore = totalScore;
             totalScore += data.points;
-            document.getElementById('current-score').textContent = totalScore;
+            document.getElementById('current-score').textContent = totalScore.toLocaleString();
+            animateTotalBump();
+
             questionsAnswered++;
 
-            setTimeout(loadQuestion, 2000);
+            let pause;
+            if (data.points >= 15000) pause = 500;
+            else if (data.points >= 10000) pause = 1000;
+            else if (data.points >= 6500) pause = 1200;
+            else pause = 1000;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = 'Ответить';
+                loadQuestion();
+            }, pause);
+        }
+        function cartoonFlyToTotal(popup, points, style) {
+            return new Promise(resolve => {
+                const totalEl = document.getElementById('current-score');
+                const popupRect = popup.getBoundingClientRect();
+                const totalRect = totalEl.getBoundingClientRect();
+
+                const startX = popupRect.left + popupRect.width / 2;
+                const startY = popupRect.top + popupRect.height / 2;
+                const endX = totalRect.left + totalRect.width / 2;
+                const endY = totalRect.top + totalRect.height / 2;
+
+                const flyer = document.createElement('div');
+                flyer.textContent = '+' + points.toLocaleString();
+                flyer.style.cssText = `
+                    position: fixed;
+                    left: ${startX}px;
+                    top: ${startY}px;
+                    font-size: 2rem;
+                    font-weight: 900;
+                    color: ${style.color};
+                    text-shadow: 0 0 20px ${style.glow}, 0 0 40px ${style.glow};
+                    z-index: 1000;
+                    pointer-events: none;
+                    transform: translate(-50%, -50%) scale(1);
+                `;
+                document.body.appendChild(flyer);
+
+                popup.style.display = 'none';
+
+                const totalDuration = 600;
+                const startTime = performance.now();
+
+                function animate(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+
+                    let currentX = startX;
+                    let currentY = startY;
+                    let scale = 1;
+
+                    if (progress < 0.2) {
+                        const p = progress / 0.2;
+                        currentY = startY - 40 * Math.sin(p * Math.PI);
+                        scale = 1 + p * 0.3;
+                    } else if (progress < 0.35) {
+                        const p = (progress - 0.2) / 0.15;
+                        currentY = startY + p * 50;
+                        scale = 1.3 - p * 0.4;
+                    } else {
+                        const p = (progress - 0.35) / 0.65;
+                        const eased = Math.pow(p, 3);
+                        currentX = startX + (endX - startX) * eased;
+                        currentY = startY + 50 + (endY - startY - 50) * eased;
+                        scale = 0.9 - p * 0.5;
+                    }
+
+                    flyer.style.left = currentX + 'px';
+                    flyer.style.top = currentY + 'px';
+                    flyer.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                    flyer.style.opacity = 1 - progress * 0.2;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        flyer.style.transition = 'all 0.1s ease';
+                        flyer.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                        flyer.style.opacity = '0';
+                        setTimeout(() => {
+                            flyer.remove();
+                            resolve();
+                        }, 100);
+                    }
+                }
+                requestAnimationFrame(animate);
+            });
+        }
+        function animateTotalBump() {
+            const el = document.getElementById('current-score');
+            el.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            el.style.transform = 'scale(1.5)';
+            el.style.color = '#ffd700';
+            setTimeout(() => {
+                el.style.transform = 'scale(1)';
+                el.style.color = '#fff';
+            }, 200);
         }
 
         async function endGame() {
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('leaderboard-screen').style.display = 'block';
 
-            const response = await fetch('/api/save-score', {
+            await fetch('/api/save-score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId, score: totalScore })
             });
-            const data = await response.json();
-
-            if (data.needs_nickname) {
-                const nickname = prompt('🎉 Вы попали в топ-10! Введите никнейм:');
-                if (nickname) {
-                    await fetch('/api/nickname', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: userId, nickname: nickname })
-                    });
-                }
-            }
-
             loadLeaderboard();
         }
 
@@ -147,8 +385,8 @@
             const response = await fetch('/api/leaderboard');
             const data = await response.json();
             const list = document.getElementById('leaderboard-list');
-            list.innerHTML = data.map((entry, i) =>
-                `<li>${entry.nickname} — ${entry.best_score} очков</li>`
+            list.innerHTML = data.map(entry =>
+                `<li>${entry.nickname} — ${entry.best_score.toLocaleString()} очков</li>`
             ).join('');
         }
 
