@@ -2,3 +2,5 @@
 __pycache__/
 *.db
 .idea/
+seed_data.py
+seed_data_players.py

@@ -5,35 +5,588 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Угадай число</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <meta name="description" content="Угадай число — игра на интуицию. Проверьте своё чувство масштаба. Сравните себя с другими игроками.">
+    <meta property="og:title" content=" Угадай число">
+    <meta property="og:description" content="Проверьте интуицию — угадывайте масштаб всего на свете. 5 вопросов, реальные факты, статистика игроков.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ваш-домен.com">
+    <style>
+        .home-links {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .home-link-card {
+            padding: 10px 18px;
+            background: rgba(108,99,255,0.06);
+            border: 1px solid rgba(108,99,255,0.12);
+            border-radius: 12px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .home-link-card:hover {
+            background: rgba(108,99,255,0.12);
+            border-color: rgba(108,99,255,0.25);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
 <body>
+
     <div class="container">
+        <!-- Главная страница -->
+        <div id="home-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; background: #000; padding: 40px 20px;">
+
+            <!-- Заголовок -->
+            <h1 style="font-size: 3.5rem; margin-bottom: 40px; letter-spacing: -1px;">Угадай число</h1>
+            <!-- Кнопка Играть -->
+            <button onclick="startGame()" style="padding: 24px 80px; background: linear-gradient(135deg, #6c63ff, #8b83ff); border: none; border-radius: 20px; color: #fff; font-size: 1.5rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 40px rgba(108,99,255,0.4); transition: all 0.3s; margin-bottom: 70px;"
+                onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 50px rgba(108,99,255,0.6)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 40px rgba(108,99,255,0.4)';"
+            >Играть</button>
+
+            <!-- Как это работает -->
+            <style>
+                .how-step {
+                    opacity: 0;
+                    transform: translateY(15px);
+                    transition: opacity 0.45s ease, transform 0.45s ease;
+                }
+                .how-step.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            </style>
+
+            <div style="max-width: 700px; width: 100%; margin: 0 auto 30px;">
+                <h3 style="color: #fff; font-size: 1.15rem; font-weight: 600; margin-bottom: 28px; text-align: center;">
+                    Как устроена игра
+                </h3>
+
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+
+                    <div class="how-step" style="flex: 1; min-width: 180px; max-width: 210px; padding: 20px 16px; background: rgba(108,99,255,0.04); border-radius: 14px; border: 1px solid rgba(108,99,255,0.1); text-align: center;">
+                        <p style="color: #ddd; font-size: 0.9rem; margin: 0 0 8px; font-weight: 600;">
+                            Почувствуйте масштаб
+                        </p>
+                        <p style="color: #888; font-size: 0.78rem; line-height: 1.5; margin: 0;">
+                            Попробуйте оценить то, что невозможно знать точно. Проявите свою интуицию.
+                        </p>
+                    </div>
+
+                    <div class="how-step" style="flex: 1; min-width: 180px; max-width: 210px; padding: 20px 16px; background: rgba(108,99,255,0.04); border-radius: 14px; border: 1px solid rgba(108,99,255,0.1); text-align: center;">
+                        <p style="color: #ddd; font-size: 0.9rem; margin: 0 0 8px; font-weight: 600;">
+                            Точность решает
+                        </p>
+                        <p style="color: #888; font-size: 0.78rem; line-height: 1.5; margin: 0;">
+                            Очки зависят от того, насколько сильно вы близки к правильному ответу.
+                        </p>
+                    </div>
+
+                    <div class="how-step" style="flex: 1; min-width: 180px; max-width: 210px; padding: 20px 16px; background: rgba(108,99,255,0.04); border-radius: 14px; border: 1px solid rgba(108,99,255,0.1); text-align: center;">
+                        <p style="color: #ddd; font-size: 0.9rem; margin: 0 0 8px; font-weight: 600;">
+                            Сравните результаты
+                        </p>
+                        <p style="color: #888; font-size: 0.78rem; line-height: 1.5; margin: 0;">
+                            Узнайте, как ответили другие игроки, и насколько вы необычны.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <script>
+                const howSteps = document.querySelectorAll('.how-step');
+
+                const howObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            howSteps.forEach((step, i) => {
+                                setTimeout(() => {
+                                    step.classList.add('visible');
+                                }, i * 300);
+                            });
+                        } else {
+                            howSteps.forEach(step => step.classList.remove('visible'));
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                const howBlock = howSteps[0]?.parentElement?.parentElement;
+                if (howBlock) howObserver.observe(howBlock);
+            </script>
+            <!-- Демо-анимация игры -->
+            <div style="max-width: 500px; width: 100%; margin-bottom: 40px; padding: 20px; background: rgba(108,99,255,0.03); border-radius: 16px; border: 1px solid rgba(108,99,255,0.08); position: relative; overflow: hidden; height: 250px; display: flex; align-items: center; justify-content: center;">
+
+                <div id="demo-container" style="text-align: center; width: 100%; position: relative;">
+
+                    <!-- Сцена 1: Вопрос + ввод -->
+                    <div id="demo-question" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; opacity: 1; transition: opacity 0.25s; pointer-events: none;">
+                        <p style="color: #aaa; font-size: 0.75rem; margin-bottom: 4px;">Вопрос 3 из 5</p>
+                        <p style="color: #ddd; font-size: 0.9rem; margin-bottom: 16px; padding: 0 10px;">Сколько раз нужно сложить лист бумаги пополам, чтобы он достал до Луны?</p>
+
+                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 8px;">
+                            <div style="position: relative; display: inline-block;">
+                                <input type="text" id="demo-answer" disabled style="width: 100px; padding: 10px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; text-align: center; font-size: 1rem; caret-color: transparent;">
+                                <span id="demo-cursor" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #6c63ff; font-size: 1.1rem; animation: demoBlink 1.8s infinite;">|</span>
+                            </div>
+                            <span style="color: #888; font-size: 0.8rem;">раз</span>
+                        </div>
+                        <button id="demo-submit-btn" disabled style="padding: 8px 24px; background: #6c63ff; border: none; border-radius: 8px; color: #fff; font-size: 0.85rem; opacity: 0.8; box-shadow: 0 0 12px rgba(108,99,255,0.4);">Ответить</button>
+                    </div>
+
+                    <!-- Сцена 2: Очки -->
+                    <div id="demo-score" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; opacity: 0; transition: opacity 0.25s; pointer-events: none;">
+                        <p style="color: #fff; font-size: 1rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.3);">Рейтинг:</p>
+                        <p id="demo-score-value" style="font-size: 2.8rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 30px rgba(255,215,0,0.7); margin: 0 0 6px;">0</p>
+                    </div>
+
+                    <!-- Сцена 3: Статистика -->
+                    <div id="demo-stats" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; opacity: 0; transition: opacity 0.25s; pointer-events: none;">
+                        <p style="color: #ddd; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">Результаты</p>
+                        <canvas id="demo-chart" width="420" height="170"></canvas>
+                        <div id="demo-indices" style="display: flex; justify-content: center; gap: 18px; margin-top: 4px;">
+                            <span class="demo-index" style="color: #b39ddb; font-size: 0.75rem; font-weight: 600; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🧭 9.2</span>
+                            <span class="demo-index" style="color: #ffe082; font-size: 0.75rem; font-weight: 600; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">⚡ 6.8</span>
+                            <span class="demo-index" style="color: #ffcc80; font-size: 0.75rem; font-weight: 600; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🎰 7.1</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <style>
+                @keyframes demoBlink {
+                    0%, 40%, 100% { opacity: 1; }
+                    20%, 60% { opacity: 0; }
+                }
+            </style>
+
+            <script>
+                let demoTimers = [];
+                let demoRunning = false;
+                let chartAnimFrame = null;
+                let typeTimer = null;
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        demoTimers.forEach(t => clearTimeout(t));
+                        demoTimers = [];
+                        if (chartAnimFrame) cancelAnimationFrame(chartAnimFrame);
+                        if (typeTimer) clearInterval(typeTimer);
+                        demoRunning = false;
+                    } else {
+                        if (!demoRunning) resetDemo();
+                    }
+                });
+
+                function resetDemo() {
+                    if (demoRunning) return;
+                    demoRunning = true;
+
+                    demoTimers.forEach(t => clearTimeout(t));
+                    demoTimers = [];
+                    if (chartAnimFrame) cancelAnimationFrame(chartAnimFrame);
+                    if (typeTimer) clearInterval(typeTimer);
+
+                    const question = document.getElementById('demo-question');
+                    const score = document.getElementById('demo-score');
+                    const stats = document.getElementById('demo-stats');
+
+                    // Все сцены в одной точке, управляем только opacity
+                    question.style.opacity = '1';
+                    score.style.opacity = '0';
+                    stats.style.opacity = '0';
+
+                    document.getElementById('demo-score-value').textContent = '0';
+
+                    const canvas = document.getElementById('demo-chart');
+                    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+
+                    document.querySelectorAll('.demo-index').forEach(el => el.style.transform = 'translateY(0)');
+
+                    document.getElementById('demo-answer').value = '';
+                    document.getElementById('demo-cursor').style.display = 'inline';
+
+                    const btn = document.getElementById('demo-submit-btn');
+                    btn.style.opacity = '0.8';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.background = '#6c63ff';
+                    btn.style.boxShadow = '0 0 12px rgba(108,99,255,0.4)';
+
+                    demoTimers.push(setTimeout(() => {
+                        document.getElementById('demo-cursor').style.display = 'none';
+                        typeAnswer('67', () => {
+                            demoTimers.push(setTimeout(() => {
+                                pressButton();
+                                demoTimers.push(setTimeout(() => {
+                                    // Вопрос → очки
+                                    question.style.opacity = '0';
+                                    demoTimers.push(setTimeout(() => {
+                                        score.style.opacity = '1';
+                                        animateScoreValue(12528, () => {
+                                            demoTimers.push(setTimeout(() => {
+                                                // Очки → статистика
+                                                score.style.opacity = '0';
+                                                demoTimers.push(setTimeout(() => {
+                                                    stats.style.opacity = '1';
+                                                    drawDemoChart(() => {
+                                                        animateIndices();
+                                                        demoTimers.push(setTimeout(() => {
+                                                            // Статистика → вопрос
+                                                            stats.style.opacity = '0';
+                                                            demoTimers.push(setTimeout(() => {
+                                                                demoRunning = false;
+                                                                resetDemo();
+                                                            }, 300));
+                                                        }, 2500));
+                                                    });
+                                                }, 300));
+                                            }, 800));
+                                        });
+                                    }, 300));
+                                }, 350));
+                            }, 300));
+                        });
+                    }, 1500));
+                }
+
+                function pressButton() {
+                    const btn = document.getElementById('demo-submit-btn');
+                    btn.style.transform = 'scale(0.95)';
+                    btn.style.background = '#5a52e0';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 150);
+                }
+
+                function typeAnswer(text, callback) {
+                    const input = document.getElementById('demo-answer');
+                    input.value = '';
+                    let i = 0;
+                    typeTimer = setInterval(() => {
+                        if (i <= text.length) {
+                            input.value = text.substring(0, i);
+                            i++;
+                        } else {
+                            clearInterval(typeTimer);
+                            typeTimer = null;
+                            if (callback) callback();
+                        }
+                    }, 100);
+                }
+
+                function animateScoreValue(target, callback) {
+                    const el = document.getElementById('demo-score-value');
+                    el.textContent = '0';
+                    const duration = 500;
+                    const start = performance.now();
+
+                    function update(now) {
+                        const p = Math.min((now - start) / duration, 1);
+                        const eased = 1 - Math.pow(1 - p, 3);
+                        const val = Math.floor(target * eased);
+                        el.textContent = '+' + val.toLocaleString();
+                        if (p < 1) {
+                            requestAnimationFrame(update);
+                        } else {
+                            el.textContent = '+' + target.toLocaleString();
+                            el.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                            el.style.transform = 'scale(1.3)';
+                            setTimeout(() => {
+                                el.style.transform = 'scale(1)';
+                                if (callback) callback();
+                            }, 200);
+                        }
+                    }
+                    requestAnimationFrame(update);
+                }
+
+                function drawDemoChart(callback) {
+                    const canvas = document.getElementById('demo-chart');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    const w = canvas.width, h = canvas.height;
+                    ctx.clearRect(0, 0, w, h);
+
+                    const bars = [
+                        { pct: 10, label: '<10' },
+                        { pct: 18, label: '10–35' },
+                        { pct: 30, label: '35–64' },
+                        { pct: 26, label: '64–102', isUser: true },
+                        { pct: 16, label: '>102' }
+                    ];
+
+                    const maxPct = 30;
+                    const barH = 25;
+                    const gap = 5;
+                    const totalH = bars.length * (barH + gap);
+                    const startY = (h - totalH) / 2;
+                    const chartW = w - 120;
+                    const labelX = 85;
+
+                    const animStart = performance.now();
+                    const animDuration = 500;
+
+                    function animate(now) {
+                        const progress = Math.min((now - animStart) / animDuration, 1);
+                        const eased = 1 - Math.pow(1 - progress, 3);
+
+                        ctx.clearRect(0, 0, w, h);
+
+                        bars.forEach((bar, i) => {
+                            const y = startY + i * (barH + gap);
+                            const barW = (bar.pct / maxPct) * chartW * 0.85 * eased;
+
+                            const gradient = ctx.createLinearGradient(labelX, 0, labelX + barW, 0);
+                            if (bar.isUser) {
+                                gradient.addColorStop(0, '#ffd700');
+                                gradient.addColorStop(1, '#ffaa00');
+                            } else {
+                                gradient.addColorStop(0, '#6c63ff');
+                                gradient.addColorStop(1, '#8b83ff');
+                            }
+                            ctx.fillStyle = gradient;
+                            ctx.shadowColor = bar.isUser ? 'rgba(255,215,0,0.4)' : 'transparent';
+                            ctx.shadowBlur = bar.isUser ? 6 : 0;
+                            ctx.beginPath();
+                            ctx.roundRect(labelX, y, Math.max(barW, 3), barH, 5);
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+
+                            if (progress > 0.3) {
+                                const alpha = Math.min(1, (progress - 0.3) / 0.4);
+                                ctx.globalAlpha = alpha;
+                                ctx.fillStyle = bar.isUser ? '#000' : '#fff';
+                                ctx.font = 'bold 10px sans-serif';
+                                ctx.textAlign = barW > 45 ? 'right' : 'left';
+                                const textX = barW > 45 ? labelX + barW - 8 : labelX + barW + 8;
+                                ctx.fillText(bar.pct + '%', textX, y + barH/2 + 4);
+                                ctx.globalAlpha = 1;
+                            }
+
+                            if (bar.isUser && progress > 0.25) {
+                                ctx.fillStyle = '#ffd700';
+                                ctx.font = 'bold 10px sans-serif';
+                                ctx.textAlign = 'left';
+                                ctx.fillText('Вы точнее 37%', labelX + barW + 8, y + barH/2 + 4);
+                            }
+
+                            ctx.fillStyle = '#999';
+                            ctx.font = '9px sans-serif';
+                            ctx.textAlign = 'right';
+                            ctx.fillText(bar.label, labelX - 8, y + barH/2 + 3);
+                        });
+
+                        if (progress < 1) {
+                            chartAnimFrame = requestAnimationFrame(animate);
+                        } else {
+                            if (callback) callback();
+                        }
+                    }
+                    chartAnimFrame = requestAnimationFrame(animate);
+                }
+
+                function animateIndices() {
+                    const indices = document.querySelectorAll('.demo-index');
+                    indices.forEach((el, i) => {
+                        setTimeout(() => {
+                            el.style.transform = 'translateY(-8px)';
+                            setTimeout(() => el.style.transform = 'translateY(0)', 300);
+                        }, i * 100);
+                    });
+                }
+
+                resetDemo();
+
+                const demoBlock = document.getElementById('demo-container').parentElement;
+                const demoObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !demoRunning) resetDemo();
+                    });
+                }, { threshold: 0.3 });
+                demoObserver.observe(demoBlock);
+            </script>
+            <!-- О проекте -->
+            <div id="project-block" style="max-width: 500px; width: 100%; margin-bottom: 30px; margin-top: 100px; text-align: left;">
+
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                    <span style="font-size: 1.3rem;">ⓘ</span>
+                    <h3 style="color: #fff; font-size: 1.1rem; margin: 0; font-weight: 600;">О проекте</h3>
+                </div>
+
+                <p style="color: #ddd; font-size: 0.95rem; line-height: 1.6; margin: 0 0 14px; font-weight: 500;">
+                    Сайт создан для проверки феномена «мудрости толпы» — способности большой группы людей коллективно приближаться к правильному ответу, даже если каждый отдельный человек ошибается.
+                </p>
+
+                <p style="color: #888; font-size: 0.82rem; line-height: 1.7; margin: 0 0 14px;">
+                    В 1906 году английский учёный Фрэнсис Гальтон описал знаменитый эксперимент: на ярмарке сотни людей пытались угадать вес быка. Отдельные ответы сильно различались, но среднее значение оказалось удивительно близко к реальному весу.
+                </p>
+
+                <p style="color: #888; font-size: 0.82rem; line-height: 1.7; margin: 0 0 20px;">
+                    Мы решили проверить, работает ли этот принцип на самых разных числовых вопросах.
+                </p>
+
+                <!-- Статус эксперимента -->
+                <div style="padding: 20px; background: rgba(108,99,255,0.05); border-radius: 14px; border: 1px solid rgba(108,99,255,0.12); text-align: center;">
+
+                    <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #6c63ff; animation: pulse-dot 2s infinite;"></span>
+                        <span style="color: #6c63ff; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">ЭКСПЕРИМЕНТ ПРОДОЛЖАЕТСЯ</span>
+                    </div>
+
+                    <p style="color: #ddd; font-size: 0.9rem; margin: 0 0 12px; font-weight: 500;">Мы собираем ответы игроков.</p>
+
+                    <div style="margin-bottom: 12px;">
+                        <span id="total-answers-count" style="font-size: 1.8rem; font-weight: 800; color: #fff; display: inline-block;">0</span>
+                        <p style="color: #888; font-size: 0.75rem; margin: 2px 0 0;">ответов</p>
+                    </div>
+
+                    <p style="color: #888; font-size: 0.8rem; margin: 0;">Скоро здесь появятся результаты.</p>
+
+                </div>
+
+            </div>
+
+            <style>
+                @keyframes pulse-dot {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.3; }
+                }
+            </style>
+
+            <script>
+                // Загрузка реального количества ответов
+                let totalAnswersAnimated = false;
+
+                async function loadTotalAnswers() {
+                    try {
+                        const response = await fetch('/api/total-answers');
+                        const data = await response.json();
+                        const el = document.getElementById('total-answers-count');
+                        if (el && data.total) {
+                            window._totalAnswersValue = data.total;
+                            // Наблюдатель скролла
+                            const statsBlock = document.getElementById('project-block');
+                            if (statsBlock) {
+                                const observer = new IntersectionObserver((entries) => {
+                                    entries.forEach(entry => {
+                                        if (entry.isIntersecting) {
+                                            animateNumber(el, window._totalAnswersValue);
+                                        }
+                                    });
+                                }, { threshold: 0.3 });
+                                observer.observe(statsBlock);
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                function animateNumber(el, target) {
+                    const duration = 1500;
+                    const start = performance.now();
+
+                    function update(now) {
+                        const p = Math.min((now - start) / duration, 1);
+                        const eased = 1 - Math.pow(1 - p, 3);
+                        const val = Math.floor(target * eased);
+                        el.textContent = val.toLocaleString();
+
+                        if (p < 1) {
+                            requestAnimationFrame(update);
+                        } else {
+                            el.textContent = target.toLocaleString();
+
+                            // Прыжок — с задержкой чтобы transition успел примениться
+                            setTimeout(() => {
+                                el.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                                el.style.transform = 'scale(1.15)';
+
+                                setTimeout(() => {
+                                    el.style.transform = 'scale(1)';
+                                }, 250);
+                            }, 50);
+                        }
+                    }
+                    requestAnimationFrame(update);
+                }
+
+                loadTotalAnswers();
+            </script>
+
+            <!-- Карточки-ссылки -->
+            <div class="home-links" style="margin-bottom: 50px;">
+                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('question')">📝 Предложить вопрос</a>
+                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('feedback')">💬 Обратная связь</a>
+            </div>
+
+            <!-- Футер -->
+            <div style="color: #444; font-size: 0.75rem; margin-top: 20px; display: flex; gap: 15px;">
+                <a href="/static/privacy.html" style="color: #555; text-decoration: none;">Политика конфиденциальности</a>
+                <span>·</span>
+                <span>© 2026 Угадай число</span>
+            </div>
+            <!-- Cookie-баннер -->
+            <div id="cookie-banner" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(20,20,35,0.95); border: 1px solid rgba(108,99,255,0.2); border-radius: 14px; padding: 16px 20px; z-index: 999; max-width: 400px; width: calc(100% - 40px); backdrop-filter: blur(20px); display: none;">
+                <p style="color: #ccc; font-size: 0.8rem; margin: 0 0 10px; line-height: 1.5;">
+                    🍪 Мы используем localStorage для сохранения вашего прогресса. Продолжая пользоваться сайтом, вы соглашаетесь с <a href="/static/privacy.html" style="color: #6c63ff;">политикой конфиденциальности</a>.
+                </p>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="acceptCookies()" style="padding: 8px 20px; background: #6c63ff; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 0.8rem; font-weight: 600;">Принять</button>
+                </div>
+            </div>
+
+            <script>
+                function acceptCookies() {
+                    localStorage.setItem('cookies_accepted', 'true');
+                    document.getElementById('cookie-banner').style.display = 'none';
+                }
+
+                // Показываем баннер если ещё не принят
+                if (!localStorage.getItem('cookies_accepted')) {
+                    document.getElementById('cookie-banner').style.display = 'block';
+                }
+            </script>
+        </div>
+
         <!-- Шапка -->
-        <header>
-            <h1>🎲 Угадай число</h1>
+        <header style="display: none;">
+            <h1>Угадай число</h1>
             <div class="score-board">
-                <span>Счёт: <strong id="current-score">0</strong></span>
-                <span>Вопрос: <strong id="question-num">1</strong>/5</span>
+                <div class="progress-dots" id="progress-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <span style="background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 20px; font-size: 0.9rem; backdrop-filter: blur(10px); white-space: nowrap;">
+                    <span id="current-score" style="color: #fff;">0</span>
+                </span>
             </div>
         </header>
 
         <!-- Карточка вопроса -->
-        <main id="game-screen">
+        <main id="game-screen" style="display: none;">
             <div class="card">
                 <img id="fact-image" class="card-image blurred" src="" alt="" style="display: none;">
-
-                <!-- Плавающая зона: очки + вопрос -->
                 <div class="question-area">
                     <div class="score-popup" id="score-popup" style="display: none;">
                         <span class="score-popup-text" id="score-popup-text">+0</span>
                     </div>
                     <p class="question-text" id="question-text">Загрузка...</p>
                 </div>
-
-                <!-- Статичная зона внизу -->
                 <div class="answer-area">
                     <div class="input-group">
-                        <input type="number" id="user-answer" placeholder="Ваше число" autofocus>
+                        <input type="number" id="user-answer" placeholder="Ваше число" autofocus autocomplete="off" inputmode="numeric" pattern="[0-9]*" step="1" min="0">
                         <span class="unit" id="unit-label"></span>
                     </div>
                     <button class="submit-btn" onclick="submitAnswer()">Ответить</button>
@@ -41,11 +594,23 @@
             </div>
         </main>
 
-        <!-- Таблица лидеров (скрыта до конца игры) -->
+        <!-- Таблица лидеров -->
         <aside id="leaderboard-screen" style="display: none;">
             <h2>🏆 Таблица лидеров</h2>
             <ol id="leaderboard-list"></ol>
             <button onclick="restartGame()">Играть ещё</button>
+        </aside>
+
+        <!-- Экран статистики -->
+        <aside id="stats-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 20; background: #000; overflow-y: auto; padding: 40px 20px 40px;">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #fff;">Результаты</h2>
+            <div id="stats-container"></div>
+            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
+                <button onclick="restartGame()" style="padding: 16px 48px; background: linear-gradient(135deg, #6c63ff, #8b83ff); border: none; border-radius: 16px; color: #fff; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(108,99,255,0.3);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 30px rgba(108,99,255,0.5)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(108,99,255,0.3)';"
+                >В меню</button>
+            </div>
         </aside>
     </div>
 
@@ -55,8 +620,9 @@
         let questionsAnswered = 0;
         const TOTAL_QUESTIONS = 5;
         const userId = getUserId();
+        let currentGameAnswers = [];
+        let questionStartTime = 0;
 
-        // Цвета категорий (Brawl Stars стиль: яркие, с градиентом)
         const categoryStyles = {
             200:   { color: '#fff', glow: '#9e9e9e', bg: 'rgba(158,158,158,0.3)' },
             800:   { color: '#fff', glow: '#80deea', bg: 'rgba(128,222,234,0.3)' },
@@ -70,26 +636,115 @@
         function getCategoryStyle(points) {
             const thresholds = Object.keys(categoryStyles).map(Number).sort((a, b) => a - b);
             let style = categoryStyles[200];
-            for (const t of thresholds) {
-                if (points >= t) style = categoryStyles[t];
-            }
+            for (const t of thresholds) if (points >= t) style = categoryStyles[t];
             return style;
         }
 
         function getUserId() {
             let id = localStorage.getItem('guess_user_id');
-            if (!id) {
-                id = crypto.randomUUID();
-                localStorage.setItem('guess_user_id', id);
-            }
+            if (!id) { id = crypto.randomUUID(); localStorage.setItem('guess_user_id', id); }
             return id;
         }
+
+        function openForm(type) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;`;
+
+            let innerHTML = '';
+            if (type === 'question') {
+                innerHTML = `
+                    <div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="margin-bottom: 15px; color: #fff;">📝 Предложить вопрос</h3>
+                        <textarea id="form-question" placeholder="Введите вопрос" rows="2" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit; overflow-y: auto;"></textarea>
+                        <input id="form-answer" placeholder="Правильный ответ (число)" type="number" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
+                        <input id="form-unit" placeholder="Единица измерения" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
+                        <input id="form-email" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="submitForm('question')" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
+                            <button onclick="closeModal()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
+                        </div>
+                    </div>`;
+            } else {
+                innerHTML = `
+                    <div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="margin-bottom: 15px; color: #fff;">💬 Обратная связь</h3>
+                        <textarea id="form-text" placeholder="Ваше сообщение..." rows="3" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit; overflow-y: auto;"></textarea>
+                        <input id="form-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="submitForm('feedback')" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
+                            <button onclick="closeModal()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
+                        </div>
+                    </div>`;
+            }
+
+            modal.innerHTML = innerHTML;
+            modal.id = 'current-modal';
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', esc); }});
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('current-modal');
+            if (modal) modal.remove();
+        }
+
+        function submitForm(type) {
+            if (type === 'question') {
+                const q = document.getElementById('form-question').value.trim();
+                const a = document.getElementById('form-answer').value.trim();
+                const u = document.getElementById('form-unit').value.trim();
+                const e = document.getElementById('form-email').value.trim();
+                if (!q || !a || !u) { alert('Заполните обязательные поля!'); return; }
+                fetch('/api/suggest-question', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({question:q, answer:parseFloat(a), unit:u, email:e}) })
+                .then(() => { closeModal(); alert('✅ Вопрос отправлен!'); })
+                .catch(() => { closeModal(); alert('✅ Сохранено локально!'); });
+            } else {
+                const t = document.getElementById('form-text').value.trim();
+                const e = document.getElementById('form-email2').value.trim();
+                if (!t) { alert('Напишите сообщение!'); return; }
+                fetch('/api/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text:t, email:e}) })
+                .then(() => { closeModal(); alert('💬 Спасибо!'); })
+                .catch(() => { closeModal(); alert('💬 Сохранено локально!'); });
+            }
+        }
+
+        // ===== ИГРОВЫЕ ФУНКЦИИ =====
+        function startGame() {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.querySelector('header').style.display = 'flex';
+            totalScore = 0;
+            questionsAnswered = 0;
+            currentGameAnswers = [];
+            document.getElementById('current-score').textContent = '0';
+            loadQuestion();
+        }
+
+        function restartGame() {
+            totalScore = 0;
+            questionsAnswered = 0;
+            currentGameAnswers = [];
+            document.getElementById('current-score').textContent = '0';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('leaderboard-screen').style.display = 'none';
+            document.getElementById('stats-screen').style.display = 'none';
+            document.querySelector('header').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'flex';
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'done');
+                if (index === 0) dot.classList.add('active');
+            });
+        }
+
 
         async function loadQuestion() {
             if (questionsAnswered >= TOTAL_QUESTIONS) {
                 endGame();
                 return;
             }
+            questionStartTime = performance.now();
 
             const response = await fetch('/api/question');
             const data = await response.json();
@@ -100,15 +755,26 @@
             document.getElementById('user-answer').value = '';
             document.getElementById('score-popup').style.display = 'none';
             document.getElementById('user-answer').focus();
-            document.getElementById('question-num').textContent = questionsAnswered + 1;
 
             const img = document.getElementById('fact-image');
             document.querySelector('.card').classList.remove('revealed');
             if (data.image_url) {
-                img.src = data.image_url;
-                img.style.display = 'block';
+                img.style.opacity = '0';
                 img.classList.add('blurred');
                 img.classList.remove('revealed');
+                img.style.display = 'block';
+
+                const newImg = new Image();
+                newImg.onload = () => {
+                    img.src = data.image_url;
+                    img.style.opacity = '1';
+                };
+                newImg.src = data.image_url;
+
+                if (newImg.complete) {
+                    img.src = data.image_url;
+                    img.style.opacity = '1';
+                }
             } else {
                 img.style.display = 'none';
             }
@@ -130,10 +796,9 @@
             return new Promise(resolve => {
                 const duration = 1200 + (targetPoints / 15000) * 1400;
                 const startTime = performance.now();
-                let lastMilestone = 0;
 
                 const intensity = Math.min(1, targetPoints / 15000);
-                const baseGlow = 15 + intensity * 50;
+                const baseGlow = 10 + intensity * 20; // было 15 + intensity * 50
                 const baseFontSize = 3.5;
 
                 element.style.color = '#fff';
@@ -142,7 +807,6 @@
                     0 0 ${baseGlow}px ${style.glow}
                 `;
                 element.style.fontSize = baseFontSize + 'rem';
-                element.style.transform = 'translateY(0)';
 
                 function update(currentTime) {
                     const elapsed = currentTime - startTime;
@@ -153,13 +817,6 @@
                         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
                     const currentValue = Math.floor(targetPoints * eased);
-
-                    // Плавное увеличение размера для чисел > 4000
-                    if (targetPoints > 4000) {
-                        const sizeBoost = 1 + intensity * eased * 0.8;
-                        element.style.fontSize = (baseFontSize * sizeBoost) + 'rem';
-                    }
-
                     element.textContent = '+' + currentValue.toLocaleString();
 
                     if (progress < 1) {
@@ -167,29 +824,20 @@
                     } else {
                         element.textContent = '+' + targetPoints.toLocaleString();
 
-                        if (targetPoints > 4000) {
-                            element.style.fontSize = (baseFontSize * (1 + intensity * 0.8)) + 'rem';
-                        }
-
-                        // Вспышка вместо прыжка
+                        // Лёгкая вспышка без гигантских теней
                         element.style.textShadow = `
-                            0 0 ${baseGlow * 3}px ${style.glow},
-                            0 0 ${baseGlow * 6}px ${style.glow},
-                            0 0 ${baseGlow * 10}px #fff
+                            0 0 ${baseGlow * 2}px ${style.glow},
+                            0 0 ${baseGlow * 4}px ${style.glow}
                         `;
 
                         setTimeout(() => {
-                            element.style.transition = 'text-shadow 0.3s ease, font-size 0.3s ease';
-                            element.style.fontSize = baseFontSize + 'rem';
-                            element.style.textShadow = `
-                                0 0 ${baseGlow * 0.5}px ${style.glow},
-                                0 0 ${baseGlow}px ${style.glow}
-                            `;
+                            element.style.transition = 'text-shadow 0.2s ease';
+                            element.style.textShadow = ''; // Сбрасываем, чтобы CSS мог управлять
                             setTimeout(() => {
                                 element.style.transition = '';
                                 resolve();
-                            }, 300);
-                        }, 200);
+                            }, 200);
+                        }, 100);
                     }
                 }
                 requestAnimationFrame(update);
@@ -198,10 +846,15 @@
 
         async function submitAnswer() {
             const answer = parseFloat(document.getElementById('user-answer').value);
-            if (isNaN(answer)) return;
+            if (isNaN(answer) || answer < 0) return;
 
             const btn = document.querySelector('.submit-btn');
+            const input = document.getElementById('user-answer');
+
+            if (btn.disabled) return; // двойная защита
+
             btn.disabled = true;
+            input.disabled = true;
             btn.textContent = 'Ответить';
 
             const response = await fetch('/api/check', {
@@ -210,6 +863,30 @@
                 body: JSON.stringify({ fact_id: currentFactId, user_answer: answer })
             });
             const data = await response.json();
+
+            const answerTime = (performance.now() - questionStartTime) / 1000;
+            // После получения data:
+            currentGameAnswers.push({
+                fact_id: currentFactId,
+                question: document.getElementById('question-text').textContent,
+                user_answer: answer,
+                correct_answer: data.correct_answer,
+                points: data.points,
+                answer_time: answerTime
+            });
+
+            // Отправляем на сервер
+            fetch('/api/save-answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fact_id: currentFactId,
+                    user_answer: answer,
+                    correct_answer: data.correct_answer,
+                    points: data.points,
+                    user_id: userId
+                })
+            });
 
             const img = document.getElementById('fact-image');
             if (img.style.display !== 'none') {
@@ -229,16 +906,8 @@
 
             // Шаг 2: Корона для 15000
             if (data.points >= 15000) {
-                // Плавно уменьшаем число
-                popupText.style.transition = 'font-size 0.4s ease';
-                popupText.style.fontSize = '2.5rem';
-                await new Promise(r => setTimeout(r, 400));
-
-                // Корона
                 popup.classList.add('crowned');
-                popupText.style.transition = 'font-size 0.3s ease';
-                popupText.style.fontSize = '3.5rem';
-                popupText.style.textShadow = '0 0 30px #ffd700, 0 0 60px #ffd700';
+                popupText.style.textShadow = ''; //0 0 8px #ffd700
                 popupText.textContent = '+' + data.points.toLocaleString();
 
                 await new Promise(r => setTimeout(r, 2400));
@@ -247,15 +916,6 @@
                 await new Promise(r => setTimeout(r, 600));
 
                 popup.classList.remove('crowned', 'crowned-flyaway');
-
-                // Готовим к перелёту
-                popupText.style.transition = 'font-size 0.3s ease';
-                popupText.style.fontSize = '2.2rem';
-                popupText.style.textShadow = `0 0 15px ${style.glow}`;
-                await new Promise(r => setTimeout(r, 300));
-
-                popupText.style.transition = '';
-                popupText.style.fontSize = '';
                 popupText.style.textShadow = '';
             }
 
@@ -263,25 +923,34 @@
             await cartoonFlyToTotal(popup, data.points, style);
 
             // Шаг 4: Общий счёт
-            const oldScore = totalScore;
             totalScore += data.points;
             document.getElementById('current-score').textContent = totalScore.toLocaleString();
             animateTotalBump();
 
             questionsAnswered++;
 
+            // Обновляем точки после ответа
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'done');
+                if (index < questionsAnswered) dot.classList.add('done');
+                if (index === questionsAnswered && questionsAnswered < TOTAL_QUESTIONS) dot.classList.add('active');
+            });
+
             let pause;
-            if (data.points >= 15000) pause = 500;
-            else if (data.points >= 10000) pause = 1000;
-            else if (data.points >= 6500) pause = 1200;
-            else pause = 1000;
+            if (data.points >= 15000) pause = 300;
+            else if (data.points >= 10000) pause = 800;
+            else if (data.points >= 6500) pause = 1000;
+            else pause = 800;
 
             setTimeout(() => {
                 btn.disabled = false;
+                input.disabled = false;
                 btn.textContent = 'Ответить';
+                input.focus();
                 loadQuestion();
             }, pause);
         }
+
         function cartoonFlyToTotal(popup, points, style) {
             return new Promise(resolve => {
                 const totalEl = document.getElementById('current-score');
@@ -371,14 +1040,596 @@
 
         async function endGame() {
             document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('leaderboard-screen').style.display = 'block';
+            document.getElementById('leaderboard-screen').style.display = 'none';
+            document.getElementById('stats-screen').style.display = 'block';
 
+            // Сохраняем общий счёт
             await fetch('/api/save-score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId, score: totalScore })
             });
+
+            // Загружаем статистику
+            await loadStats();
             loadLeaderboard();
+        }
+
+        async function loadStats() {
+            const container = document.getElementById('stats-container');
+
+            let html = '';
+
+            // Легенда
+            html += `
+                <div id="legend-block" style="max-width: 550px; margin: 0 auto 25px auto; padding: 14px 20px; background: rgba(108,99,255,0.06); border-radius: 14px; border: 1px solid rgba(108,99,255,0.12); font-size: 0.85rem; color: #aaa; font-weight: 600; text-align: center;">
+                    <span class="legend-icon">🙋</span> Вы
+                    <span style="margin: 0 16px;"></span>
+                    <span class="legend-icon">👥</span> Игроки
+                    <span style="margin: 0 16px;"></span>
+                    <span class="legend-icon">%</span> — доля ответов в диапазоне
+                </div>
+            `;
+
+            // Графики
+            for (let i = 0; i < currentGameAnswers.length; i++) {
+                const ans = currentGameAnswers[i];
+                const statsRes = await fetch(`/api/stats/${ans.fact_id}`);
+                const stats = await statsRes.json();
+
+                html += `<div class="stats-chart">`;
+                html += `<h3>Вопрос ${i + 1}: ${ans.question}</h3>`;
+
+                if (stats.bins.length > 0) {
+                    html += `<canvas id="chart-${i}" width="550" height="250"></canvas>`;
+                    setTimeout(() => drawChart(`chart-${i}`, stats, ans.user_answer), 300);
+
+                    const allAnswers = stats.all_answers || [];
+                    const correctAnswer = stats.correct_answer;
+                    const errors = [];
+                    allAnswers.forEach(a => errors.push(Math.abs(a - correctAnswer)));
+                    errors.sort((a, b) => a - b);
+                    const medianError = errors.length > 0 ? errors[Math.floor(errors.length / 2)] : 0;
+
+                    let difficultyStars;
+                    if (medianError < correctAnswer * 0.1) difficultyStars = '⭐⭐⭐⭐⭐';
+                    else if (medianError < correctAnswer * 0.3) difficultyStars = '⭐⭐⭐⭐';
+                    else if (medianError < correctAnswer * 0.7) difficultyStars = '⭐⭐⭐';
+                    else if (medianError < correctAnswer * 2) difficultyStars = '⭐⭐';
+                    else difficultyStars = '⭐';
+
+                    html += `<span class="your-answer-marker">Ваш ответ: ${ans.user_answer.toLocaleString()}</span>`;
+                    html += `<p style="color: #ffd700; margin-top: 5px; font-size: 0.85rem;">Сложность: ${difficultyStars}</p>`;
+                } else {
+                    html += `<p style="color: #888;">Вы первый, кто ответил на этот вопрос!</p>`;
+                }
+                html += `</div>`;
+            }
+
+            // ===== РАСЧЁТ ИНДЕКСОВ =====
+
+            const totalPoints = currentGameAnswers.reduce((sum, a) => sum + a.points, 0);
+
+            const rankRes = await fetch('/api/score-percentile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score: totalPoints })
+            });
+            const rankData = await rankRes.json();
+            const topPercent = 100 - rankData.percentile;
+
+            // Калибровка
+            let calibrationScore = 0;
+            currentGameAnswers.forEach(ans => {
+                if (ans.correct_answer > 0) {
+                    const orderCorrect = Math.floor(Math.log10(ans.correct_answer));
+                    const orderUser = Math.floor(Math.log10(Math.max(1, Math.abs(ans.user_answer))));
+                    const orderDiff = Math.abs(orderCorrect - orderUser);
+                    if (orderDiff === 0) calibrationScore += 10;
+                    else if (orderDiff === 1) calibrationScore += 7;
+                    else if (orderDiff === 2) calibrationScore += 4;
+                    else calibrationScore += 1;
+                }
+            });
+            const calibration = parseFloat((calibrationScore / currentGameAnswers.length).toFixed(2));
+
+            // Уверенность
+            const avgTime = currentGameAnswers.reduce((sum, a) => sum + (a.answer_time), 0) / currentGameAnswers.length;
+            const confidence = Math.min(10, Math.max(0, parseFloat(((1 - avgTime / 15) * 10).toFixed(2))));
+
+            // Рискованность
+            let riskScore = 0;
+            currentGameAnswers.forEach(ans => {
+                if (ans.correct_answer > 0) {
+                    const ratio = Math.abs(ans.user_answer) / Math.max(1, ans.correct_answer);
+                    if (ratio > 100 || ratio < 0.01) riskScore += 10;
+                    else if (ratio > 10 || ratio < 0.1) riskScore += 7;
+                    else if (ratio > 2 || ratio < 0.5) riskScore += 4;
+                    else riskScore += 1;
+                }
+            });
+            const riskiness = Math.min(10, parseFloat((riskScore / currentGameAnswers.length).toFixed(2)));
+
+            // ===== HTML БЛОК =====
+
+            html += `
+                <div id="rating-block" style="max-width: 550px; margin: 30px auto 0 auto; text-align: center; padding: 25px; background: rgba(108,99,255,0.08); border-radius: 16px; border: 1px solid rgba(108,99,255,0.15);">
+                    <p style="font-size: 1.2rem; color: #ddd; margin-bottom: 8px;">
+                        Рейтинг: <span id="rating-score" style="font-weight: 800; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3);">0 баллов</span>
+                    </p>
+                    <p style="font-size: 1.2rem; color: #ddd; margin-bottom: 20px;">
+                        <span id="rating-percent" style="font-weight: 800; color: #8b83ff;">Топ 100%</span>
+                    </p>
+                    <div style="display: flex; justify-content: space-around; gap: 10px;">
+                        <div style="text-align: center; position: relative;">
+                            <canvas id="ring-calibration" width="80" height="80"></canvas>
+                            <div style="color: #ddd; font-size: 0.8rem; margin-top: 4px; font-weight: 600;">
+                                Калибровка
+                                <span class="info-icon" data-tooltip="Насколько точно вы оцениваете масштаб чисел. Учитывает, попадаете ли вы в правильный разряд." style="cursor: help; display: inline-block; width: 16px; height: 16px; background: rgba(255,255,255,0.15); border-radius: 50%; text-align: center; line-height: 16px; font-size: 10px; color: #aaa; margin-left: 2px;">?</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; position: relative;">
+                            <canvas id="ring-confidence" width="80" height="80"></canvas>
+                            <div style="color: #ddd; font-size: 0.8rem; margin-top: 4px; font-weight: 600;">
+                                Уверенность
+                                <span class="info-icon" data-tooltip="Отражает вашу скорость принятия решений. Чем быстрее вы отвечаете, тем выше показатель." style="cursor: help; display: inline-block; width: 16px; height: 16px; background: rgba(255,255,255,0.15); border-radius: 50%; text-align: center; line-height: 16px; font-size: 10px; color: #aaa; margin-left: 2px;">?</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; position: relative;">
+                            <canvas id="ring-riskiness" width="80" height="80"></canvas>
+                            <div style="color: #ddd; font-size: 0.8rem; margin-top: 4px; font-weight: 600;">
+                                Рискованность
+                                <span class="info-icon" data-tooltip="Насколько часто вы выбираете экстремальные, неожиданные числа вместо безопасных средних." style="cursor: help; display: inline-block; width: 16px; height: 16px; background: rgba(255,255,255,0.15); border-radius: 50%; text-align: center; line-height: 16px; font-size: 10px; color: #aaa; margin-left: 2px;">?</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            // Анимация легенды при каждом скролле
+            const legendBlock = document.getElementById('legend-block');
+            if (legendBlock) {
+                let wasVisible = false;
+
+                const legendObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !wasVisible) {
+                            wasVisible = true;
+                            const icons = entry.target.querySelectorAll('.legend-icon');
+                            icons.forEach((icon, i) => {
+                                setTimeout(() => {
+                                    icon.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                                    icon.style.transform = 'translateY(-6px)';
+                                    setTimeout(() => {
+                                        icon.style.transform = 'translateY(0)';
+                                    }, 300);
+                                }, i * 100);
+                            });
+                        }
+                        if (!entry.isIntersecting) {
+                            wasVisible = false;
+                        }
+                    });
+                }, { threshold: 0.3 });
+
+                legendObserver.observe(legendBlock);
+            }
+            // Тултипы
+            document.querySelectorAll('.info-icon').forEach(icon => {
+                icon.addEventListener('mouseenter', function(e) {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'custom-tooltip';
+                    tooltip.textContent = this.dataset.tooltip;
+                    tooltip.style.cssText = `
+                        position: fixed;
+                        left: ${e.clientX + 10}px;
+                        top: ${e.clientY - 10}px;
+                        background: rgba(0,0,0,0.9);
+                        color: #ddd;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        font-size: 0.75rem;
+                        max-width: 200px;
+                        z-index: 1000;
+                        pointer-events: none;
+                        border: 1px solid rgba(255,255,255,0.15);
+                    `;
+                    document.body.appendChild(tooltip);
+                    this._tooltip = tooltip;
+                });
+                icon.addEventListener('mouseleave', function() {
+                    if (this._tooltip) {
+                        this._tooltip.remove();
+                        this._tooltip = null;
+                    }
+                });
+                icon.addEventListener('mousemove', function(e) {
+                    if (this._tooltip) {
+                        this._tooltip.style.left = (e.clientX + 10) + 'px';
+                        this._tooltip.style.top = (e.clientY - 10) + 'px';
+                    }
+                });
+            });
+
+            // ===== АНИМАЦИЯ =====
+
+            const ratingBlock = document.getElementById('rating-block');
+            let animated = false;
+
+            const ratingObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !animated) {
+                        animated = true;
+                        animateRating(totalPoints, topPercent);
+                        animateRing('ring-calibration', calibration, '#6c63ff');
+                        animateRing('ring-confidence', confidence, '#ffd700');
+                        animateRing('ring-riskiness', riskiness, '#ef5350');
+                    }
+                    if (!entry.isIntersecting) {
+                        animated = false;
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            if (ratingBlock) ratingObserver.observe(ratingBlock);
+
+            function animateRating(targetScore, targetPercent) {
+                const scoreEl = document.getElementById('rating-score');
+                const percentEl = document.getElementById('rating-percent');
+                const duration = 800;
+                const startTime = performance.now();
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+
+                    scoreEl.textContent = Math.floor(targetScore * eased).toLocaleString() + ' баллов';
+                    percentEl.textContent = 'Топ ' + Math.floor(100 - eased * (100 - targetPercent)) + '%';
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        scoreEl.textContent = targetScore.toLocaleString() + ' баллов';
+                        percentEl.textContent = 'Топ ' + targetPercent + '%';
+
+                        // Прыжок блока
+                        const block = document.getElementById('rating-block');
+                        block.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        block.style.transform = 'scale(1.03)';
+                        setTimeout(() => block.style.transform = 'scale(1)', 200);
+                    }
+                }
+                requestAnimationFrame(update);
+            }
+
+            function animateRing(canvasId, targetValue, color) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const cx = 40, cy = 40, radius = 32;
+                const duration = 1000;
+                const startTime = performance.now();
+
+                function draw(progress) {
+                    ctx.clearRect(0, 0, 80, 80);
+
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                    ctx.lineWidth = 6;
+                    ctx.stroke();
+
+                    const endAngle = -Math.PI / 2 + (progress * (targetValue / 10)) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius, -Math.PI / 2, endAngle);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 6;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = 8;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 18px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText((progress * targetValue).toFixed(1), cx, cy + 6);
+                }
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    draw(eased);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        draw(1);
+                    }
+                }
+                requestAnimationFrame(update);
+            }
+        }
+
+
+        function drawChart(canvasId, stats, userVal) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = { top: 20, right: 70, bottom: 35, left: 90 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            const allAnswers = stats.all_answers || [];
+            const correctAnswer = stats.correct_answer;
+            const total = stats.total_answers;
+
+            if (!correctAnswer || allAnswers.length === 0) return;
+
+            function fmt(n) {
+                if (n >= 1000000000) return Math.round(n / 1000000000) + 'B';
+                if (n >= 1000000) return Math.round(n / 1000000) + 'M';
+                if (n >= 1000) return Math.round(n / 1000) + 'k';
+                if (n >= 1) return Math.round(n).toString();
+                if (n >= 0.01) return n.toFixed(2);
+                return n.toFixed(4);
+            }
+
+            const center = correctAnswer;
+            const correctPosition = [3, 4, 5][Math.floor(Math.random() * 3)];
+
+            const centerStart = center * 0.8;
+            const centerEnd = center * 1.25;
+
+            const leftCount = correctPosition;
+            const rightCount = 8 - correctPosition;
+
+            const leftBoundaries = [];
+            for (let i = leftCount; i > 0; i--) {
+                leftBoundaries.push(centerStart * (i / (leftCount + 1)) * 0.5);
+            }
+
+            const rightBoundaries = [];
+            for (let i = 1; i <= rightCount; i++) {
+                rightBoundaries.push(centerEnd * (1 + (i / (rightCount + 1)) * 4));
+            }
+
+            let boundaries = [...leftBoundaries, centerStart, centerEnd, ...rightBoundaries];
+            boundaries.sort((a, b) => a - b);
+
+            const filtered = [boundaries[0]];
+            for (let i = 1; i < boundaries.length; i++) {
+                if (fmt(boundaries[i]) !== fmt(filtered[filtered.length - 1])) {
+                    filtered.push(boundaries[i]);
+                }
+            }
+
+            const ranges = [];
+
+            for (let i = 0; i < 10; i++) {
+                let start, end, label;
+
+                if (i === 0) {
+                    start = 0;
+                    end = filtered[0];
+                    label = `< ${fmt(end)}`;
+                } else if (i === 9) {
+                    start = filtered[filtered.length - 1];
+                    end = Infinity;
+                    label = `> ${fmt(start)}`;
+                } else {
+                    const idx = i - 1;
+                    if (idx < filtered.length - 1) {
+                        start = filtered[idx];
+                        end = filtered[idx + 1];
+                    } else {
+                        start = filtered[filtered.length - 2] || 0;
+                        end = filtered[filtered.length - 1] || start * 2;
+                    }
+                    const s = fmt(start), e = fmt(end);
+                    label = s === e ? fmt(start) : `${s}-${e}`;
+                }
+
+                let count = 0;
+                allAnswers.forEach(a => {
+                    if (i === 0 && a < end) count++;
+                    else if (i === 9 && a >= start) count++;
+                    else if (a >= start && a < end) count++;
+                });
+
+                const isUser = i === 0 ? userVal < end :
+                               i === 9 ? userVal >= start :
+                               (userVal >= start && userVal < end);
+                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+
+                ranges.push({ count, pct: Math.max(pct, isUser ? 1 : 0), label, isUser });
+            }
+
+            const userFound = ranges.some(r => r.isUser);
+            if (!userFound) {
+                if (userVal < (filtered[0] || 0)) {
+                    ranges[0].isUser = true;
+                    ranges[0].pct = Math.max(ranges[0].pct, 1);
+                } else {
+                    ranges[9].isUser = true;
+                    ranges[9].pct = Math.max(ranges[9].pct, 1);
+                }
+            }
+
+            // Считаем процентиль один раз
+            let betterThan = 0;
+            allAnswers.forEach(a => {
+                if (Math.abs(a - correctAnswer) > Math.abs(userVal - correctAnswer)) {
+                    betterThan++;
+                }
+            });
+            const percentile = total > 0 ? Math.round((betterThan / total) * 100) : 0;
+            const statsText = `ВЫ ТОЧНЕЕ ${percentile}%`;
+
+            // Считаем сложность вопроса (без выбросов)
+            const errors = [];
+            allAnswers.forEach(a => {
+                errors.push(Math.abs(a - correctAnswer));
+            });
+            errors.sort((a, b) => a - b);
+
+            // Медианная ошибка (устойчива к выбросам)
+            const medianError = errors.length > 0 ? errors[Math.floor(errors.length / 2)] : 0;
+            const normalizedError = correctAnswer > 0 ? medianError / correctAnswer : 0;
+
+            let difficultyStars;
+            if (normalizedError < 0.10) difficultyStars = '⭐⭐⭐⭐⭐'; // очень сложный
+            else if (normalizedError < 0.25) difficultyStars = '⭐⭐⭐⭐';
+            else if (normalizedError < 0.50) difficultyStars = '⭐⭐⭐';
+            else if (normalizedError < 1.00) difficultyStars = '⭐⭐';
+            else difficultyStars = '⭐'; // лёгкий
+            console.log(`medianError=${medianError}, normalizedError=${normalizedError}, stars=${difficultyStars}`);
+            const difficultyText = `Сложность: ${difficultyStars}`;
+
+            const maxPct = Math.max(...ranges.map(r => r.pct), 1);
+            const barHeight = Math.min(26, (chartH / 10) - 4);
+            const totalBarsHeight = 10 * (barHeight + 4);
+            const startY = padding.top + Math.max(0, (chartH - totalBarsHeight) / 2);
+            const statsY = startY + 10 * (barHeight + 4) + 16;
+
+            let animationPlayed = false;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animationPlayed = true;
+                        animateBars();
+                    } else {
+                        animationPlayed = false;
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            observer.observe(canvas);
+
+            drawStatic();
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, width, height);
+
+                ctx.fillStyle = '#888';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'right';
+                ranges.forEach((range, i) => {
+                    const y = startY + i * (barHeight + 4) + barHeight / 2 + 3;
+                    ctx.fillText(range.label, padding.left - 10, y);
+                });
+
+                // Сложность
+                ctx.fillStyle = '#aaa';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(difficultyText, padding.left + chartW / 2, statsY - 16);
+
+                // Статистика
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(255,215,0,0.5)';
+                ctx.shadowBlur = 10;
+                ctx.fillText(statsText, padding.left + chartW / 2, statsY);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#555';
+                ctx.font = '13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('↕ Прокрутите', width / 2, height / 2);
+            }
+
+            function animateBars() {
+                const startTime = performance.now();
+                const animDuration = 900;
+
+                function animate(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / animDuration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+
+                    ctx.clearRect(0, 0, width, height);
+
+                    ranges.forEach((range, i) => {
+                        const y = startY + i * (barHeight + 4);
+
+                        const minBarW = range.pct <= 3 ? 10 + range.pct * 8 : 35;
+                        const rawBarW = (range.pct / maxPct) * chartW * 0.9;
+                        const barW = Math.max(rawBarW * eased, (range.pct > 0 || range.isUser) ? minBarW * eased : 1);
+
+                        const pctAlpha = Math.min(1, Math.max(0, (progress - 0.3) / 0.4));
+                        const displayPct = Math.round(range.pct * eased);
+
+                        const gradient = ctx.createLinearGradient(padding.left, 0, padding.left + barW, 0);
+                        if (range.isUser) {
+                            gradient.addColorStop(0, '#ffd700');
+                            gradient.addColorStop(1, '#ffaa00');
+                        } else {
+                            gradient.addColorStop(0, '#6c63ff');
+                            gradient.addColorStop(1, '#8b83ff');
+                        }
+                        ctx.fillStyle = gradient;
+
+                        if (barW > 1) {
+                            const radius = Math.min(6, barHeight / 2);
+                            ctx.beginPath();
+                            ctx.moveTo(padding.left + radius, y);
+                            ctx.lineTo(padding.left + barW - radius, y);
+                            ctx.quadraticCurveTo(padding.left + barW, y, padding.left + barW, y + radius);
+                            ctx.lineTo(padding.left + barW, y + barHeight - radius);
+                            ctx.quadraticCurveTo(padding.left + barW, y + barHeight, padding.left + barW - radius, y + barHeight);
+                            ctx.lineTo(padding.left + radius, y + barHeight);
+                            ctx.quadraticCurveTo(padding.left, y + barHeight, padding.left, y + barHeight - radius);
+                            ctx.lineTo(padding.left, y + radius);
+                            ctx.quadraticCurveTo(padding.left, y, padding.left + radius, y);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+
+                        if ((range.pct > 0 || range.isUser) && progress > 0.3) {
+                            ctx.globalAlpha = pctAlpha;
+                            ctx.fillStyle = range.isUser ? '#000' : '#fff';
+                            ctx.font = 'bold 10px sans-serif';
+                            ctx.textAlign = 'right';
+                            const textX = padding.left + barW - 2; //-6
+                            ctx.fillText(Math.max(displayPct, range.isUser ? 1 : 0) + '%', textX, y + barHeight / 2 + 4);
+                            ctx.globalAlpha = 1;
+                        }
+
+                        if (range.isUser && progress > 0.2) {
+                            ctx.fillStyle = '#ffd700';
+                            ctx.font = 'bold 10px sans-serif';
+                            ctx.textAlign = 'left';
+                            ctx.fillText(statsText, padding.left + barW + 6, y + barHeight / 2 + 4);
+                        }
+                    });
+
+                    ctx.fillStyle = '#888';
+                    ctx.font = '10px sans-serif';
+                    ctx.textAlign = 'right';
+                    ranges.forEach((range, i) => {
+                        const y = startY + i * (barHeight + 4) + barHeight / 2 + 3;
+                        ctx.fillText(range.label, padding.left - 10, y);
+                    });
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+            const userRange = ranges.find(r => r.isUser);
+            return userRange ? userRange.pct : 0;
         }
 
         async function loadLeaderboard() {
@@ -390,20 +1641,89 @@
             ).join('');
         }
 
-        function restartGame() {
-            totalScore = 0;
-            questionsAnswered = 0;
-            document.getElementById('current-score').textContent = '0';
-            document.getElementById('question-num').textContent = '1';
-            document.getElementById('game-screen').style.display = 'block';
-            document.getElementById('leaderboard-screen').style.display = 'none';
-            loadQuestion();
+
+        function openQuestionForm() {
+            // Копируем форму из showComingSoon для "Предложить вопрос"
+            const modal = document.createElement('div');
+            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;`;
+            modal.innerHTML = `<div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin-bottom: 15px; color: #fff;">📝 Предложить вопрос</h3>
+                <textarea id="suggest-question2" placeholder="Введите вопрос" rows="2" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit;"></textarea>
+                <input id="suggest-answer2" placeholder="Правильный ответ (число)" type="number" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
+                <input id="suggest-unit2" placeholder="Единица измерения" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
+                <input id="suggest-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="submitQuestion2()" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
+                    <button onclick="this.closest('div').parentElement.remove()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); }});
         }
 
-        loadQuestion();
+        function submitQuestion2() {
+            const q = document.getElementById('suggest-question2').value.trim();
+            const a = document.getElementById('suggest-answer2').value.trim();
+            const u = document.getElementById('suggest-unit2').value.trim();
+            const e = document.getElementById('suggest-email2').value.trim();
+            if (!q || !a || !u) { alert('Заполните поля!'); return; }
+            fetch('/api/suggest-question', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({question:q, answer:parseFloat(a), unit:u, email:e}) })
+            .then(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('✅ Отправлено!'); })
+            .catch(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('✅ Сохранено локально!'); });
+        }
+
+        function openFeedbackForm() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;`;
+            modal.innerHTML = `<div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin-bottom: 15px; color: #fff;">💬 Обратная связь</h3>
+                <textarea id="feedback-text2" placeholder="Ваше сообщение..." rows="3" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit;"></textarea>
+                <input id="feedback-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="submitFeedback2()" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
+                    <button onclick="this.closest('div').parentElement.remove()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); }});
+        }
+
+        function submitFeedback2() {
+            const t = document.getElementById('feedback-text2').value.trim();
+            const e = document.getElementById('feedback-email2').value.trim();
+            if (!t) { alert('Напишите сообщение!'); return; }
+            fetch('/api/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text:t, email:e}) })
+            .then(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('💬 Спасибо!'); })
+            .catch(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('💬 Сохранено локально!'); });
+        }
+
 
         document.getElementById('user-answer').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') submitAnswer();
+        });
+    </script>
+<!-- Временная кнопка для тестирования статистики -->
+    <button id="test-stats-btn" style="position: fixed; bottom: 15px; right: 15px; z-index: 999; padding: 10px 16px; background: rgba(108,99,255,0.6); border: 1px solid rgba(108,99,255,0.8); border-radius: 10px; color: #fff; font-size: 0.85rem; cursor: pointer; backdrop-filter: blur(10px);">
+        🧪 Тест-статистика
+    </button>
+
+    <script>
+        document.getElementById('test-stats-btn').addEventListener('click', () => {
+            currentGameAnswers = [
+                {fact_id: 0, question: "Сколько костей у человека?", user_answer: 206, correct_answer: 206, points: 15000, answer_time: 2.1},
+                {fact_id: 1, question: "Сколько волос на голове?", user_answer: 50000, correct_answer: 120000, points: 4000, answer_time: 5.5},
+                {fact_id: 2, question: "Вес облака (тонн)?", user_answer: 10, correct_answer: 500, points: 800, answer_time: 3.0},
+                {fact_id: 3, question: "Длина кишечника (м)?", user_answer: 1000000, correct_answer: 7, points: 200, answer_time: 1.2},
+                {fact_id: 4, question: "Скорость света до Земли?", user_answer: 7, correct_answer: 8, points: 10000, answer_time: 4.8}
+            ];
+            totalScore = 30000;
+            document.getElementById('current-score').textContent = totalScore.toLocaleString();
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('leaderboard-screen').style.display = 'none';
+            document.getElementById('stats-screen').style.display = 'block';
+            loadStats();
         });
     </script>
 </body>

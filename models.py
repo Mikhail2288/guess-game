@@ -21,6 +21,34 @@ class Score(Base):
     updated_at = Column(DateTime, default=datetime.utcnow)
 
 
+class Answer(Base):
+    __tablename__ = "answers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    fact_id = Column(Integer, nullable=False)
+    user_answer = Column(Float, nullable=False)
+    correct_answer = Column(Float, nullable=False)
+    points = Column(Integer, nullable=False)
+    user_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+class Suggestion(Base):
+    __tablename__ = "suggestions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    question = Column(String, nullable=False)
+    answer = Column(Float, nullable=False)
+    unit = Column(String, nullable=False)
+    email = Column(String, nullable=True)  # ← добавить
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Feedback(Base):
+    __tablename__ = "feedbacks"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    text = Column(String, nullable=False)
+    email = Column(String, nullable=True)  # ← добавить
+    created_at = Column(DateTime, default=datetime.utcnow)
