@@ -1,0 +1,11 @@
+version: 1.0
+
+meta:
+  environment: python
+  toolchain:
+    name: pip
+    version: 3.10
+
+run:
+  scriptName: main.py
+  command: uvicorn main:app --host 0.0.0.0 --port 80
