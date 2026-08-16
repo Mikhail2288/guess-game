@@ -7,13 +7,6 @@ import random
 
 from models import init_db, async_session, Score, Answer, Suggestion, Feedback
 from facts import get_random_fact, get_fact_by_id, FACTS
-
-
-# Подключаем папки со статикой и шаблонами
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -23,6 +16,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Подключаем папки со статикой и шаблонами
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # Главная страница
 @app.get("/", response_class=HTMLResponse)
