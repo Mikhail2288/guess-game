@@ -3,6 +3,5 @@ uvicorn
 sqlalchemy
 aiosqlite
 asyncpg
-psycopg2-binary
 jinja2
 python-multipart
