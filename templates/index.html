@@ -1071,6 +1071,13 @@
                 </div>
             `;
 
+            // Заглушка на время загрузки
+            container.innerHTML = html + `
+                <div style="text-align: center; padding: 60px 20px; color: #555; font-size: 1rem;">
+                    Ожидание результатов...
+                </div>
+            `;
+
             // Графики
             const factIds = currentGameAnswers.map(a => a.fact_id);
             const statsRes = await fetch('/api/stats-batch', {
