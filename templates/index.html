@@ -1072,15 +1072,22 @@
             `;
 
             // Графики
+            const factIds = currentGameAnswers.map(a => a.fact_id);
+            const statsRes = await fetch('/api/stats-batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fact_ids: factIds })
+            });
+            const allStats = await statsRes.json();
+
             for (let i = 0; i < currentGameAnswers.length; i++) {
                 const ans = currentGameAnswers[i];
-                const statsRes = await fetch(`/api/stats/${ans.fact_id}`);
-                const stats = await statsRes.json();
+                const stats = allStats[ans.fact_id] || { bins: [], total_answers: 0 };
 
                 html += `<div class="stats-chart">`;
                 html += `<h3>Вопрос ${i + 1}: ${ans.question}</h3>`;
 
-                if (stats.bins.length > 0) {
+                if (stats.bins && stats.bins.length > 0) {
                     html += `<canvas id="chart-${i}" width="550" height="250"></canvas>`;
                     setTimeout(() => drawChart(`chart-${i}`, stats, ans.user_answer), 300);
 

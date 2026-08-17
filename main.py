@@ -279,3 +279,44 @@ async def total_answers():
         result = await session.execute(select(Answer))
         total = len(result.scalars().all())
         return {"total": total}
+
+
+@app.post("/api/stats-batch")
+async def stats_batch(data: dict = Body(...)):
+    fact_ids = data.get("fact_ids", [])
+    result = {}
+    for fact_id in fact_ids:
+        async with async_session() as session:
+            answers = (await session.execute(
+                select(Answer).where(Answer.fact_id == fact_id)
+            )).scalars().all()
+
+            if answers:
+                user_answers = [a.user_answer for a in answers]
+                correct_answer = answers[0].correct_answer
+                total = len(user_answers)
+                min_val = min(user_answers)
+                max_val = max(user_answers)
+                bin_count = 10
+                bin_width = (max_val - min_val) / bin_count if max_val > min_val else 1
+                bins = []
+                for i in range(bin_count):
+                    start = min_val + i * bin_width
+                    end = start + bin_width
+                    count = sum(1 for a in user_answers if start <= a < end)
+                    if i == bin_count - 1:
+                        count = sum(1 for a in user_answers if start <= a <= end)
+                    bins.append(count)
+
+                result[str(fact_id)] = {
+                    "bins": bins,
+                    "correct_answer": correct_answer,
+                    "total_answers": total,
+                    "min_answer": min_val,
+                    "max_answer": max_val,
+                    "all_answers": user_answers
+                }
+            else:
+                result[str(fact_id)] = {"bins": [], "total_answers": 0}
+
+    return result
