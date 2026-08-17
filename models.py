@@ -7,11 +7,15 @@ import uuid
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./game.db")
 
-# ВАЖНО: обе замены — и для postgres:// и для postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Убираем sslmode=require, asyncpg всегда использует SSL для Neon
+if "sslmode=require" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("?sslmode=require", "")
+    DATABASE_URL = DATABASE_URL.replace("&sslmode=require", "")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
