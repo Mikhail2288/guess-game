@@ -1042,6 +1042,7 @@
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('leaderboard-screen').style.display = 'none';
             document.getElementById('stats-screen').style.display = 'block';
+            document.getElementById('stats-container').innerHTML = '';
 
             // Сохраняем общий счёт
             await fetch('/api/save-score', {
