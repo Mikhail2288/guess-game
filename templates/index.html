@@ -1082,14 +1082,13 @@
 
             for (let i = 0; i < currentGameAnswers.length; i++) {
                 const ans = currentGameAnswers[i];
-                const stats = allStats[ans.fact_id] || { bins: [], total_answers: 0 };
+                const stats = allStats[String(ans.fact_id)] || { bins: [], total_answers: 0 };
 
                 html += `<div class="stats-chart">`;
                 html += `<h3>Вопрос ${i + 1}: ${ans.question}</h3>`;
 
                 if (stats.bins && stats.bins.length > 0) {
                     html += `<canvas id="chart-${i}" width="550" height="250"></canvas>`;
-                    setTimeout(() => drawChart(`chart-${i}`, stats, ans.user_answer), 300);
 
                     const allAnswers = stats.all_answers || [];
                     const correctAnswer = stats.correct_answer;
@@ -1195,6 +1194,15 @@
 
             container.innerHTML = html;
 
+            for (let i = 0; i < currentGameAnswers.length; i++) {
+                const canvas = document.getElementById(`chart-${i}`);
+                if (canvas) {
+                    const stats = allStats[String(currentGameAnswers[i].fact_id)];
+                    if (stats && stats.bins && stats.bins.length > 0) {
+                        drawChart(`chart-${i}`, stats, currentGameAnswers[i].user_answer);
+                    }
+                }
+            }
             // Анимация легенды при каждом скролле
             const legendBlock = document.getElementById('legend-block');
             if (legendBlock) {
