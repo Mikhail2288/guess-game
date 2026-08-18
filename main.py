@@ -9,12 +9,54 @@ from models import init_db, async_session, Score, Answer, Suggestion, Feedback
 from facts import get_random_fact, get_fact_by_id, FACTS
 from contextlib import asynccontextmanager
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import time
+from collections import defaultdict
+
+# Rate limit: 10 запросов за 10 секунд на IP
+rate_limit_store = defaultdict(list)
+RATE_LIMIT = 10
+RATE_WINDOW = 10
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Пропускаем статику
+    if request.url.path.startswith("/static"):
+        return await call_next(request)
+
+    # Только API
+    if request.url.path.startswith("/api/"):
+        ip = request.client.host
+        now = time.time()
+
+        # Убираем старые запросы
+        rate_limit_store[ip] = [t for t in rate_limit_store[ip] if now - t < RATE_WINDOW]
+
+        if len(rate_limit_store[ip]) >= RATE_LIMIT:
+            return JSONResponse(
+                status_code=429,
+                content={"error": "Слишком много запросов. Подождите."}
+            )
+
+        rate_limit_store[ip].append(now)
+
+    return await call_next(request)
+
+@app.middleware("http")
+async def cache_static_middleware(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 # Подключаем папки со статикой и шаблонами
 app.mount("/static", StaticFiles(directory="static"), name="static")
