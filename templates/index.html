@@ -524,8 +524,8 @@
 
             <!-- Карточки-ссылки -->
             <div class="home-links" style="margin-bottom: 50px;">
-                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('question')">📝 Предложить вопрос</a>
-                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('feedback')">💬 Обратная связь</a>
+                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('question')">Предложить вопрос</a>
+                <a class="home-link-card" href="javascript:void(0)" onclick="openForm('feedback')">Обратная связь</a>
             </div>
 
             <!-- Футер -->
@@ -654,11 +654,12 @@
             if (type === 'question') {
                 innerHTML = `
                     <div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
-                        <h3 style="margin-bottom: 15px; color: #fff;">📝 Предложить вопрос</h3>
+                        <h3 style="margin-bottom: 15px; color: #fff; text-align: center;">Предложить вопрос</h3>
                         <textarea id="form-question" placeholder="Введите вопрос" rows="2" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit; overflow-y: auto;"></textarea>
-                        <input id="form-answer" placeholder="Правильный ответ (число)" type="number" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
+                        <input id="form-answer" placeholder="Правильный ответ (число)" type="number" inputmode="numeric" pattern="[0-9]*" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
                         <input id="form-unit" placeholder="Единица измерения" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
-                        <input id="form-email" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                        <p style="color: #666; font-size: 0.7rem; margin: 0 0 6px;">Необязательно, но если хотите получить ответ — оставьте</p>
+                        <input id="form-email" placeholder="Email" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
                         <div style="display: flex; gap: 10px;">
                             <button onclick="submitForm('question')" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
                             <button onclick="closeModal()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
@@ -667,9 +668,10 @@
             } else {
                 innerHTML = `
                     <div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
-                        <h3 style="margin-bottom: 15px; color: #fff;">💬 Обратная связь</h3>
+                        <h3 style="margin-bottom: 15px; color: #fff; text-align: center;">Обратная связь</h3>
                         <textarea id="form-text" placeholder="Ваше сообщение..." rows="3" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit; overflow-y: auto;"></textarea>
-                        <input id="form-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
+                        <p style="color: #666; font-size: 0.7rem; margin: 0 0 6px;">Необязательно, но если хотите получить ответ — оставьте</p>
+                        <input id="form-email2" placeholder="Email" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
                         <div style="display: flex; gap: 10px;">
                             <button onclick="submitForm('feedback')" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
                             <button onclick="closeModal()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
@@ -696,17 +698,37 @@
                 const a = document.getElementById('form-answer').value.trim();
                 const u = document.getElementById('form-unit').value.trim();
                 const e = document.getElementById('form-email').value.trim();
-                if (!q || !a || !u) { alert('Заполните обязательные поля!'); return; }
-                fetch('/api/suggest-question', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({question:q, answer:parseFloat(a), unit:u, email:e}) })
-                .then(() => { closeModal(); alert('✅ Вопрос отправлен!'); })
-                .catch(() => { closeModal(); alert('✅ Сохранено локально!'); });
+
+                if (!q && !u) { showToast('Заполните вопрос и единицу измерения!', 'warning'); return; }
+                if (!q) { showToast('Заполните вопрос.', 'warning'); return; }
+                if (!u) { showToast('Заполните единицу измерения.', 'warning'); return; }
+
+                if (!a) { showToast('Введите ответ числом.', 'warning'); return; }
+
+                const numericAnswer = parseFloat(a);
+                if (isNaN(numericAnswer)) {
+                    showToast('Ответ должен быть числом, например: 42 или 3.14', 'warning');
+                    return;
+                }
+
+                fetch('/api/suggest-question', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({question: q, answer: numericAnswer, unit: u, email: e})
+                })
+                .then(() => { closeModal(); showToast('Спасибо! Вопрос отправлен.'); })
+                .catch(() => { closeModal(); showToast('Спасибо! Вопрос отправлен.'); });
             } else {
                 const t = document.getElementById('form-text').value.trim();
                 const e = document.getElementById('form-email2').value.trim();
-                if (!t) { alert('Напишите сообщение!'); return; }
-                fetch('/api/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text:t, email:e}) })
-                .then(() => { closeModal(); alert('💬 Спасибо!'); })
-                .catch(() => { closeModal(); alert('💬 Сохранено локально!'); });
+                if (!t) { showToast('Напишите сообщение!', 'warning'); return; }
+                fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({text: t, email: e})
+                })
+                .then(() => { closeModal(); showToast('Спасибо!'); })
+                .catch(() => { closeModal(); showToast('Спасибо!'); });
             }
         }
 
@@ -1074,8 +1096,9 @@
 
             // Заглушка на время загрузки
             container.innerHTML = html + `
-                <div style="text-align: center; padding: 60px 20px; color: #555; font-size: 1rem;">
-                    Ожидание результатов...
+                <div style="text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="width: 40px; height: 40px; border: 3px solid rgba(108,99,255,0.15); border-top: 3px solid #6c63ff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                    <span style="color: #555; font-size: 0.9rem;">Считаем результаты...</span>
                 </div>
             `;
 
@@ -1665,67 +1688,41 @@
         }
 
 
-        function openQuestionForm() {
-            // Копируем форму из showComingSoon для "Предложить вопрос"
-            const modal = document.createElement('div');
-            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;`;
-            modal.innerHTML = `<div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="margin-bottom: 15px; color: #fff;">📝 Предложить вопрос</h3>
-                <textarea id="suggest-question2" placeholder="Введите вопрос" rows="2" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit;"></textarea>
-                <input id="suggest-answer2" placeholder="Правильный ответ (число)" type="number" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
-                <input id="suggest-unit2" placeholder="Единица измерения" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">
-                <input id="suggest-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="submitQuestion2()" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
-                    <button onclick="this.closest('div').parentElement.remove()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
-                </div>
-            </div>`;
-            document.body.appendChild(modal);
-            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); }});
-        }
-
-        function submitQuestion2() {
-            const q = document.getElementById('suggest-question2').value.trim();
-            const a = document.getElementById('suggest-answer2').value.trim();
-            const u = document.getElementById('suggest-unit2').value.trim();
-            const e = document.getElementById('suggest-email2').value.trim();
-            if (!q || !a || !u) { alert('Заполните поля!'); return; }
-            fetch('/api/suggest-question', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({question:q, answer:parseFloat(a), unit:u, email:e}) })
-            .then(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('✅ Отправлено!'); })
-            .catch(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('✅ Сохранено локально!'); });
-        }
-
-        function openFeedbackForm() {
-            const modal = document.createElement('div');
-            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center;`;
-            modal.innerHTML = `<div style="background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 450px; width: 90%; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="margin-bottom: 15px; color: #fff;">💬 Обратная связь</h3>
-                <textarea id="feedback-text2" placeholder="Ваше сообщение..." rows="3" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 10px; font-size: 0.9rem; resize: none; font-family: inherit;"></textarea>
-                <input id="feedback-email2" placeholder="Email (необязательно)" type="email" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; margin-bottom: 15px; font-size: 0.9rem;">
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="submitFeedback2()" style="flex: 1; padding: 12px; background: #6c63ff; border: none; border-radius: 10px; color: #fff; cursor: pointer; font-weight: 600;">Отправить</button>
-                    <button onclick="this.closest('div').parentElement.remove()" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: #aaa; cursor: pointer;">Отмена</button>
-                </div>
-            </div>`;
-            document.body.appendChild(modal);
-            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-            document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); }});
-        }
-
-        function submitFeedback2() {
-            const t = document.getElementById('feedback-text2').value.trim();
-            const e = document.getElementById('feedback-email2').value.trim();
-            if (!t) { alert('Напишите сообщение!'); return; }
-            fetch('/api/feedback', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text:t, email:e}) })
-            .then(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('💬 Спасибо!'); })
-            .catch(() => { document.querySelector('[style*="z-index: 200"]').remove(); alert('💬 Сохранено локально!'); });
-        }
-
-
         document.getElementById('user-answer').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') submitAnswer();
         });
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: ${type === 'success' ? 'rgba(76,175,80,0.15)' : 'rgba(108,99,255,0.15)'};
+                border: 1px solid ${type === 'success' ? 'rgba(76,175,80,0.3)' : 'rgba(108,99,255,0.3)'};
+                border-radius: 12px;
+                padding: 12px 24px;
+                color: ${type === 'success' ? '#81c784' : '#b39ddb'};
+                font-size: 0.85rem;
+                font-weight: 500;
+                z-index: 2000;
+                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                backdrop-filter: blur(15px);
+                pointer-events: none;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateX(-50%) translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.transform = 'translateX(-50%) translateY(100px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
     </script>
 <!-- Временная кнопка для тестирования статистики -->
     <button id="test-stats-btn" style="position: fixed; bottom: 15px; right: 15px; z-index: 999; padding: 10px 16px; background: rgba(108,99,255,0.6); border: 1px solid rgba(108,99,255,0.8); border-radius: 10px; color: #fff; font-size: 0.85rem; cursor: pointer; backdrop-filter: blur(10px);">

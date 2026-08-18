@@ -472,3 +472,22 @@ h1 {
 #demo-stats, #demo-score {
     transition: opacity 0.3s !important;
 }
+
+#form-answer::-webkit-outer-spin-button,
+#form-answer::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#form-answer {
+    -moz-appearance: textfield;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#stats-screen {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
