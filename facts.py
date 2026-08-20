@@ -14,9 +14,6 @@ def load_facts():
                 "question": row["question"],
                 "answer": float(row["answer"]),
                 "unit": row["unit"],
-                "hint_low": row["hint_low"],
-                "hint_high": row["hint_high"],
-                "comparison": row["comparison"],
                 "image_url": row.get("image_url", "")  # может быть пустым
             })
 

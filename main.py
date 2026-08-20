@@ -87,49 +87,42 @@ async def get_question():
 async def check_answer(fact_id: int = Body(...), user_answer: float = Body(...)):
     fact = get_fact_by_id(fact_id)
     correct = fact["answer"]
-    error_pct = abs(user_answer - correct) / correct * 100
 
-    MAX_SCORE = 15000
-    MIN_SCORE = 100
+    import math
 
-    # Плавная формула: чем меньше ошибка, тем больше баллов
-    # error_pct = 0 → 15000
-    # error_pct = 5 → 12000
-    # error_pct = 10 → 9000
-    # error_pct = 20 → 5500
-    # error_pct = 35 → 2500
-    # error_pct = 50 → 1000
-    # error_pct = 75 → 300
-    # error_pct = 100+ → 100
+    # Защита от деления на ноль
+    if correct == 0:
+        correct = 1
+    if user_answer == 0:
+        user_answer = 0.01
 
-    # Используем экспоненциальное затухание
-    score = MAX_SCORE * (0.01 + 0.99 * (1 - min(error_pct, 100) / 100) ** 1.5)
-    final_score = round(score)
+    ratio = max(user_answer, correct) / min(user_answer, correct)
 
-    # Гарантируем минимум
-    final_score = max(MIN_SCORE, final_score)
-
-    if error_pct <= 3:
+    if ratio == 1:
+        final_score = 15000
         result = "perfect"
         hint = "🔥 Идеально!"
-    elif error_pct <= 7:
-        result = "great"
-        hint = "👏 Очень близко!"
-    elif error_pct <= 15:
-        result = "close"
-        hint = "👍 Близко!"
-    elif error_pct <= 25:
-        result = "decent"
-        hint = "🤔 Неплохо"
-    elif error_pct <= 40:
-        result = "far"
-        hint = "😐 Мимо"
-    elif error_pct <= 60:
-        result = "bad"
-        hint = "😬 Далеко"
     else:
-        result = "miss"
-        hint = "💀 Совсем мимо"
+        log_error = math.log10(ratio)
+        points = 15000 * max(0, 1 - log_error / 1.0)
+        final_score = max(50, round(points))
+
+        # Определяем результат
+        if ratio < 1.5:
+            result = "great"
+            hint = "👏 Очень близко!"
+        elif ratio < 2:
+            result = "close"
+            hint = "👍 Близко!"
+        elif ratio < 5:
+            result = "far"
+            hint = "🤔 Мимо"
+        elif ratio < 10:
+            result = "bad"
+            hint = "😬 Далеко"
+        else:
+            result = "miss"
+            hint = "💀 Совсем мимо"
 
     return JSONResponse({
         "result": result,
@@ -137,7 +130,7 @@ async def check_answer(fact_id: int = Body(...), user_answer: float = Body(...))
         "correct_answer": correct,
         "unit": fact["unit"],
         "points": final_score,
-        "error_pct": round(error_pct, 1)
+        "error_pct": round((ratio - 1) * 100, 1)
     })
 
 
