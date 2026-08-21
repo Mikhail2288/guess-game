@@ -754,7 +754,6 @@
             currentGameAnswers = [];
             document.getElementById('current-score').textContent = '0';
             document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('leaderboard-screen').style.display = 'none';
             document.getElementById('stats-screen').style.display = 'none';
             document.querySelector('header').style.display = 'none';
             document.getElementById('home-screen').style.display = 'flex';
@@ -1072,10 +1071,8 @@
         async function endGame() {
             document.body.style.overflow = 'auto';
             document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('leaderboard-screen').style.display = 'none';
             document.getElementById('stats-screen').style.display = 'block';
             document.getElementById('stats-container').innerHTML = '';
-
             // Загружаем статистику
             await loadStats();
         }
@@ -1681,6 +1678,8 @@
         }
 
 
+
+
         document.getElementById('user-answer').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') submitAnswer();
         });
@@ -1734,7 +1733,6 @@
             totalScore = 30000;
             document.getElementById('current-score').textContent = totalScore.toLocaleString();
             document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('leaderboard-screen').style.display = 'none';
             document.getElementById('stats-screen').style.display = 'block';
             loadStats();
         });
