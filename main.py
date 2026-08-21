@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, desc
 import random
 
-from models import init_db, async_session, Score, Answer, Suggestion, Feedback
+from models import init_db, async_session, Answer, Suggestion, Feedback
 from facts import get_random_fact, get_fact_by_id, FACTS
 from contextlib import asynccontextmanager
 
@@ -134,59 +134,6 @@ async def check_answer(fact_id: int = Body(...), user_answer: float = Body(...))
     })
 
 
-# Таблица лидеров
-@app.get("/api/leaderboard")
-async def leaderboard():
-    async with async_session() as session:
-        result = await session.execute(
-            select(Score).order_by(desc(Score.best_score)).limit(10)
-        )
-        scores = result.scalars().all()
-        return [
-            {
-                "nickname": s.nickname or f"Игрок {s.user_id[:6]}",
-                "best_score": s.best_score,
-                "games_played": s.games_played
-            }
-            for s in scores
-        ]
-
-
-# Сохранить результат
-@app.post("/api/save-score")
-async def save_score(user_id: str = Body(...), score: float = Body(...)):
-    async with async_session() as session:
-        existing = await session.get(Score, user_id)
-        if existing:
-            if score > existing.best_score:
-                existing.best_score = score
-            existing.games_played += 1
-        else:
-            existing = Score(user_id=user_id, best_score=score, games_played=1)
-            session.add(existing)
-        await session.commit()
-
-        top10 = await session.execute(
-            select(Score.user_id).order_by(desc(Score.best_score)).limit(10)
-        )
-        top_ids = [row[0] for row in top10]
-        needs_nickname = (user_id in top_ids) and (existing.nickname is None)
-
-        return {"needs_nickname": needs_nickname}
-
-
-# Установить никнейм
-@app.post("/api/nickname")
-async def set_nickname(user_id: str = Body(...), nickname: str = Body(...)):
-    async with async_session() as session:
-        score_obj = await session.get(Score, user_id)
-        if score_obj:
-            score_obj.nickname = nickname
-            await session.commit()
-            return {"status": "ok"}
-        return {"status": "not_found"}
-
-
 # Сохранить ответ игрока
 @app.post("/api/save-answer")
 async def save_answer(
@@ -272,14 +219,15 @@ def format_label(value):
 async def score_percentile(data: dict = Body(...)):
     score = data.get("score", 0)
     async with async_session() as session:
-        result = await session.execute(select(Score.best_score))
-        all_scores = [row[0] for row in result.all()]
+        # Все баллы из всех ответов
+        result = await session.execute(select(Answer.points))
+        all_points = [row[0] for row in result.all()]
 
-        total = len(all_scores)
+        total = len(all_points)
         if total == 0:
             return {"percentile": 100, "better_than": 0, "total": 0}
 
-        better_than = sum(1 for s in all_scores if s <= score)
+        better_than = sum(1 for p in all_points if p <= score)
         percentile = round((better_than / total) * 100)
 
         return {"percentile": percentile, "better_than": better_than, "total": total}
