@@ -597,13 +597,6 @@
             </div>
         </main>
 
-        <!-- Таблица лидеров -->
-        <aside id="leaderboard-screen" style="display: none;">
-            <h2>🏆 Таблица лидеров</h2>
-            <ol id="leaderboard-list"></ol>
-            <button onclick="restartGame()">Играть ещё</button>
-        </aside>
-
         <!-- Экран статистики -->
         <aside id="stats-screen" style="display: none;">
             <h2 style="text-align: center; margin-bottom: 30px; color: #fff;">Результаты</h2>
@@ -1083,16 +1076,8 @@
             document.getElementById('stats-screen').style.display = 'block';
             document.getElementById('stats-container').innerHTML = '';
 
-            // Сохраняем общий счёт
-            await fetch('/api/save-score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, score: totalScore })
-            });
-
             // Загружаем статистику
             await loadStats();
-            loadLeaderboard();
         }
 
         async function loadStats() {
@@ -1693,15 +1678,6 @@
             }
             const userRange = ranges.find(r => r.isUser);
             return userRange ? userRange.pct : 0;
-        }
-
-        async function loadLeaderboard() {
-            const response = await fetch('/api/leaderboard');
-            const data = await response.json();
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = data.map(entry =>
-                `<li>${entry.nickname} — ${entry.best_score.toLocaleString()} очков</li>`
-            ).join('');
         }
 
 
