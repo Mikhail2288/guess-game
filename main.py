@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, desc
 import random
 
-from models import init_db, async_session, Answer, Suggestion, Feedback
+from models import init_db, async_session, Score, Answer, Suggestion, Feedback
 from facts import get_random_fact, get_fact_by_id, FACTS
 from contextlib import asynccontextmanager
 
@@ -219,15 +219,14 @@ def format_label(value):
 async def score_percentile(data: dict = Body(...)):
     score = data.get("score", 0)
     async with async_session() as session:
-        # Все баллы из всех ответов
-        result = await session.execute(select(Answer.points))
-        all_points = [row[0] for row in result.all()]
+        result = await session.execute(select(Score.best_score))
+        all_scores = [row[0] for row in result.all()]
 
-        total = len(all_points)
+        total = len(all_scores)
         if total == 0:
             return {"percentile": 100, "better_than": 0, "total": 0}
 
-        better_than = sum(1 for p in all_points if p <= score)
+        better_than = sum(1 for s in all_scores if s <= score)
         percentile = round((better_than / total) * 100)
 
         return {"percentile": percentile, "better_than": better_than, "total": total}
